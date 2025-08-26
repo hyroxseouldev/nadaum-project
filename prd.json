@@ -1,0 +1,336 @@
+{
+  "project": {
+    "name": "Guest Photo Platform",
+    "version": "1.0.0",
+    "description": "카페별 게스트 포토를 공유하고 관리할 수 있는 웹 플랫폼",
+    "type": "Web Application",
+    "target_framework": "Next.js"
+  },
+  "objectives": {
+    "primary": "사용자들이 카페별로 게스트 포토를 쉽게 업로드하고 조회할 수 있는 플랫폼 제공",
+    "secondary": [
+      "직관적인 이미지 업로드 경험 제공",
+      "카페별 필터링을 통한 효율적인 콘텐츠 탐색",
+      "관리자를 위한 콘텐츠 관리 도구 제공"
+    ]
+  },
+  "features": {
+    "routes": {
+      "/": {
+        "name": "메인 페이지",
+        "description": "게스트 포토 조회 및 카페별 필터링",
+        "components": [
+          {
+            "name": "GuestPhotoFeed",
+            "type": "infinite_scroll",
+            "description": "게스트 포토를 무한스크롤로 표시"
+          },
+          {
+            "name": "CafeFilter",
+            "type": "filter_menu",
+            "description": "카페별 필터링 옵션 제공"
+          },
+          {
+            "name": "UploadButton",
+            "type": "navigation_button",
+            "description": "업로드 페이지로 이동하는 버튼"
+          }
+        ],
+        "requirements": [
+          "게스트 포토 무한스크롤 구현",
+          "카페별 필터링 기능",
+          "반응형 그리드 레이아웃",
+          "이미지 레이지 로딩"
+        ]
+      },
+      "/upload": {
+        "name": "업로드 페이지",
+        "description": "게스트 포토 업로드 및 약관 동의",
+        "components": [
+          {
+            "name": "ImageUploader",
+            "type": "file_upload",
+            "description": "다중 이미지 업로드 컴포넌트"
+          },
+          {
+            "name": "UploadProgress",
+            "type": "modal",
+            "description": "업로드 진행상황을 보여주는 모달"
+          },
+          {
+            "name": "TermsAgreement",
+            "type": "form",
+            "description": "약관 동의 체크박스가 포함된 폼"
+          }
+        ],
+        "requirements": [
+          "n개까지의 이미지 업로드 지원",
+          "로컬에 임시 저장 후 일괄 업로드",
+          "이미지 최적화 (압축, 리사이즈)",
+          "Supabase Storage 연동",
+          "업로드 진행상황 모달 표시",
+          "약관 동의 필수 체크",
+          "업로드 중 에러 처리"
+        ]
+      },
+      "/contact": {
+        "name": "참가자 정보 페이지",
+        "description": "참가자 정보 조회",
+        "components": [
+          {
+            "name": "ParticipantList",
+            "type": "data_list",
+            "description": "참가자 정보를 리스트 형태로 표시"
+          }
+        ],
+        "requirements": [
+          "참가자 정보 리스트 표시",
+          "검색 및 필터링 기능",
+          "반응형 테이블/카드 레이아웃"
+        ]
+      },
+      "/admin": {
+        "name": "관리자 페이지",
+        "description": "게스트 포토 관리",
+        "components": [
+          {
+            "name": "AdminDashboard",
+            "type": "crud_interface",
+            "description": "게스트 포토 CRUD 인터페이스"
+          }
+        ],
+        "requirements": [
+          "게스트 포토 목록 조회",
+          "게스트 포토 생성",
+          "게스트 포토 수정",
+          "게스트 포토 삭제",
+          "벌크 작업 지원",
+          "관리자 인증 필요"
+        ]
+      }
+    }
+  },
+  "server_actions": {
+    "getGuestPhoto": {
+      "description": "게스트 포토 목록 조회",
+      "parameters": [
+        {
+          "name": "page",
+          "type": "number",
+          "required": false,
+          "description": "페이지 번호 (무한스크롤용)"
+        },
+        {
+          "name": "cafeId",
+          "type": "string",
+          "required": false,
+          "description": "카페 ID로 필터링"
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false,
+          "default": 20,
+          "description": "한 페이지당 조회할 개수"
+        }
+      ],
+      "returns": {
+        "type": "object",
+        "properties": {
+          "data": "GuestPhoto[]",
+          "hasMore": "boolean",
+          "nextPage": "number|null"
+        }
+      }
+    },
+    "getCafe": {
+      "description": "카페 목록 조회",
+      "parameters": [],
+      "returns": {
+        "type": "Cafe[]"
+      }
+    },
+    "createGuestPhoto": {
+      "description": "새 게스트 포토 생성",
+      "parameters": [
+        {
+          "name": "imageUrl",
+          "type": "string",
+          "required": true,
+          "description": "업로드된 이미지 URL"
+        },
+        {
+          "name": "cafeId",
+          "type": "string",
+          "required": true,
+          "description": "카페 ID"
+        },
+        {
+          "name": "metadata",
+          "type": "object",
+          "required": false,
+          "description": "추가 메타데이터"
+        }
+      ],
+      "returns": {
+        "type": "GuestPhoto"
+      }
+    },
+    "updateGuestPhoto": {
+      "description": "게스트 포토 수정",
+      "parameters": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "게스트 포토 ID"
+        },
+        {
+          "name": "data",
+          "type": "Partial<GuestPhoto>",
+          "required": true,
+          "description": "수정할 데이터"
+        }
+      ],
+      "returns": {
+        "type": "GuestPhoto"
+      }
+    },
+    "deleteGuestPhoto": {
+      "description": "게스트 포토 삭제",
+      "parameters": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "삭제할 게스트 포토 ID"
+        }
+      ],
+      "returns": {
+        "type": "boolean"
+      }
+    },
+    "getParticipant": {
+      "description": "참가자 정보 조회",
+      "parameters": [
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "검색 키워드"
+        }
+      ],
+      "returns": {
+        "type": "Participant[]"
+      }
+    }
+  },
+  "data_models": {
+    "GuestPhoto": {
+      "id": "string",
+      "imageUrl": "string",
+      "thumbnailUrl": "string",
+      "cafeId": "string",
+      "metadata": "object",
+      "createdAt": "DateTime",
+      "updatedAt": "DateTime"
+    },
+    "Cafe": {
+      "id": "string",
+      "name": "string",
+      "location": "string",
+      "description": "string",
+      "createdAt": "DateTime"
+    },
+    "Participant": {
+      "id": "string",
+      "name": "string",
+      "email": "string",
+      "phone": "string",
+      "joinedAt": "DateTime"
+    }
+  },
+  "technical_requirements": {
+    "frontend": {
+      "framework": "Next.js",
+      "styling": "Tailwind CSS",
+      "state_management": "React Query/SWR",
+      "image_optimization": "Next.js Image Component + Sharp",
+      "error_handling": "Sonner (Toast notifications)"
+    },
+    "backend": {
+      "api": "Next.js API Routes/Server Actions",
+      "database": "PostgreSQL (Supabase)",
+      "storage": "Supabase Storage",
+      "authentication": "Supabase Auth (관리자 페이지용)"
+    },
+    "deployment": {
+      "platform": "Vercel",
+      "environment": "Production, Staging"
+    }
+  },
+  "ui_ux_requirements": {
+    "design_system": "Modern, minimal design",
+    "responsive": true,
+    "accessibility": "WCAG 2.1 AA 준수",
+    "performance": {
+      "image_loading": "Lazy loading with placeholder",
+      "infinite_scroll": "Intersection Observer API 사용",
+      "upload_optimization": "Progressive upload with compression"
+    },
+    "user_feedback": {
+      "loading_states": "스켈레톤 UI",
+      "error_handling": "Sonner toast notifications",
+      "success_feedback": "성공 메시지 및 visual feedback"
+    }
+  },
+  "upload_specifications": {
+    "file_types": ["image/jpeg", "image/png", "image/webp"],
+    "max_file_size": "10MB per image",
+    "max_files_per_upload": "configurable (n개)",
+    "image_optimization": {
+      "compression": "80% quality",
+      "max_width": "1920px",
+      "thumbnail_generation": "300x300px"
+    },
+    "upload_process": [
+      "파일 선택 및 로컬 저장",
+      "약관 동의 확인",
+      "이미지 최적화",
+      "Supabase Storage 업로드",
+      "데이터베이스 레코드 생성",
+      "진행상황 모달 업데이트"
+    ]
+  },
+  "error_handling": {
+    "library": "Sonner",
+    "error_types": [
+      "Network errors",
+      "File upload errors",
+      "Validation errors",
+      "Server errors",
+      "Authentication errors"
+    ],
+    "user_feedback": "Toast notifications with appropriate messaging"
+  },
+  "security_requirements": [
+    "파일 타입 검증",
+    "파일 크기 제한",
+    "CSRF 보호",
+    "관리자 페이지 인증",
+    "Rate limiting for uploads",
+    "이미지 메타데이터 제거"
+  ],
+  "performance_requirements": {
+    "page_load_time": "< 3초",
+    "image_load_time": "< 2초",
+    "infinite_scroll": "부드러운 스크롤링",
+    "upload_feedback": "실시간 진행상황 업데이트"
+  },
+  "testing_requirements": [
+    "Unit tests for server actions",
+    "Integration tests for upload flow",
+    "E2E tests for critical user journeys",
+    "Performance testing for image handling"
+  ]
+}
