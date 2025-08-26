@@ -40,7 +40,7 @@ export const guestphoto = pgTable("guestphoto", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
-  adminApproval: boolean("admin_approval").default(false).notNull(), // 관리자 승인 상태 (true: 승인, false: 미승인)
+  adminApproval: boolean("admin_approval").default(true).notNull(), // 관리자 승인 상태 (true: 승인, false: 미승인)
   cafeId: uuid("cafe_id")
     .references(() => cafe.id, { onDelete: "cascade" })
     .notNull(),
