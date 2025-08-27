@@ -39,12 +39,14 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { 
   getAllGuestPhotos, 
-  approveGuestPhoto, 
   deleteGuestPhoto, 
   getCafes, 
   createCafe,
+  updateCafe,
   getParticipants,
-  createParticipant
+  createParticipant,
+  updateParticipant,
+  updateGuestPhoto
 } from '@/lib/actions';
 import {
   Camera,
@@ -57,6 +59,8 @@ import {
   CheckCircle,
   XCircle,
   Filter,
+  X,
+  Edit,
 } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -108,6 +112,11 @@ export function AdminDashboard() {
   const [newParticipant, setNewParticipant] = useState({ name: '', instagram: '', cafeId: '' });
   const [showCafeDialog, setShowCafeDialog] = useState(false);
   const [showParticipantDialog, setShowParticipantDialog] = useState(false);
+  
+  // Edit states
+  const [editingCafe, setEditingCafe] = useState<{id: string, name: string, address: string, value: number | null} | null>(null);
+  const [editingParticipant, setEditingParticipant] = useState<{id: string, name: string, instagram: string, cafeId: string} | null>(null);
+  const [updatingPhotos, setUpdatingPhotos] = useState<Set<string>>(new Set());
 
   // Load data
   const loadData = async () => {
@@ -135,17 +144,6 @@ export function AdminDashboard() {
     loadData();
   }, []);
 
-  const handleApprovePhoto = async (photoId: string) => {
-    try {
-      await approveGuestPhoto(photoId);
-      setPhotos(photos.map(photo => 
-        photo.id === photoId ? { ...photo, adminApproval: true } : photo
-      ));
-      toast.success('게스트 포토가 승인되었습니다.');
-    } catch (error) {
-      toast.error('승인 처리 중 오류가 발생했습니다.');
-    }
-  };
 
   const handleDeletePhoto = async (photoId: string) => {
     try {
@@ -160,10 +158,8 @@ export function AdminDashboard() {
 
   const handleBulkApprove = async () => {
     try {
-      await Promise.all(selectedPhotos.map(id => approveGuestPhoto(id)));
-      setPhotos(photos.map(photo => 
-        selectedPhotos.includes(photo.id) ? { ...photo, adminApproval: true } : photo
-      ));
+      await Promise.all(selectedPhotos.map(id => updateGuestPhoto(id, { adminApproval: true })));
+      loadData(); // Reload data to reflect changes
       setSelectedPhotos([]);
       toast.success(`${selectedPhotos.length}개의 게스트 포토가 승인되었습니다.`);
     } catch (error) {
@@ -204,6 +200,46 @@ export function AdminDashboard() {
       toast.success('새 참가자가 추가되었습니다.');
     } catch (error) {
       toast.error('참가자 추가 중 오류가 발생했습니다.');
+    }
+  };
+
+  // Edit handlers
+  const handleUpdateCafe = async (id: string, name: string, address: string, value: number | null) => {
+    try {
+      await updateCafe(id, name, address, value || undefined);
+      loadData();
+      setEditingCafe(null);
+      toast.success('카페 정보가 수정되었습니다.');
+    } catch (error) {
+      toast.error('카페 수정 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleUpdateParticipant = async (id: string, name: string, instagram: string, cafeId: string) => {
+    try {
+      await updateParticipant(id, name, instagram, cafeId);
+      loadData();
+      setEditingParticipant(null);
+      toast.success('참가자 정보가 수정되었습니다.');
+    } catch (error) {
+      toast.error('참가자 수정 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleTogglePhotoApproval = async (id: string, currentStatus: boolean) => {
+    try {
+      setUpdatingPhotos(prev => new Set(prev).add(id));
+      await updateGuestPhoto(id, { adminApproval: !currentStatus });
+      loadData();
+      toast.success(`게스트 포토가 ${!currentStatus ? '승인' : '승인 취소'}되었습니다.`);
+    } catch (error) {
+      toast.error('게스트 포토 상태 변경 중 오류가 발생했습니다.');
+    } finally {
+      setUpdatingPhotos(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
     }
   };
 
@@ -431,12 +467,26 @@ export function AdminDashboard() {
                   </div>
                   
                   <div className="flex items-center space-x-2 mt-3">
-                    {!photo.adminApproval && (
-                      <Button size="sm" onClick={() => handleApprovePhoto(photo.id)}>
-                        <Check className="h-3 w-3 mr-1" />
-                        승인
-                      </Button>
-                    )}
+                    <Button 
+                      size="sm" 
+                      variant={photo.adminApproval ? "secondary" : "default"}
+                      onClick={() => handleTogglePhotoApproval(photo.id, photo.adminApproval)}
+                      disabled={updatingPhotos.has(photo.id)}
+                    >
+                      {updatingPhotos.has(photo.id) ? (
+                        <>...</>
+                      ) : photo.adminApproval ? (
+                        <>
+                          <X className="h-3 w-3 mr-1" />
+                          승인 취소
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-3 w-3 mr-1" />
+                          승인
+                        </>
+                      )}
+                    </Button>
                     
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
@@ -544,20 +594,77 @@ export function AdminDashboard() {
             {cafes.map((cafe) => (
               <Card key={cafe.id}>
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <h4 className="font-semibold">{cafe.name}</h4>
-                      <p className="text-sm text-muted-foreground flex items-center">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {cafe.address}
-                      </p>
-                      {cafe.value && (
-                        <Badge variant="outline" className="text-xs">
-                          가격대: {cafe.value?.toLocaleString()}원
-                        </Badge>
-                      )}
+                  {editingCafe?.id === cafe.id ? (
+                    // Edit mode
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor={`edit-cafe-name-${cafe.id}`}>카페명</Label>
+                        <Input
+                          id={`edit-cafe-name-${cafe.id}`}
+                          value={editingCafe.name}
+                          onChange={(e) => setEditingCafe({ ...editingCafe, name: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`edit-cafe-address-${cafe.id}`}>주소</Label>
+                        <Input
+                          id={`edit-cafe-address-${cafe.id}`}
+                          value={editingCafe.address}
+                          onChange={(e) => setEditingCafe({ ...editingCafe, address: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`edit-cafe-value-${cafe.id}`}>가격대</Label>
+                        <Input
+                          id={`edit-cafe-value-${cafe.id}`}
+                          type="number"
+                          value={editingCafe.value || ''}
+                          onChange={(e) => setEditingCafe({ ...editingCafe, value: e.target.value ? Number(e.target.value) : null })}
+                          placeholder="원"
+                        />
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleUpdateCafe(editingCafe.id, editingCafe.name, editingCafe.address, editingCafe.value)}
+                          disabled={!editingCafe.name || !editingCafe.address}
+                        >
+                          저장
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingCafe(null)}
+                        >
+                          취소
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    // View mode
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <h4 className="font-semibold">{cafe.name}</h4>
+                        <p className="text-sm text-muted-foreground flex items-center">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {cafe.address}
+                        </p>
+                        {cafe.value && (
+                          <Badge variant="outline" className="text-xs">
+                            가격대: {cafe.value?.toLocaleString()}원
+                          </Badge>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingCafe({ id: cafe.id, name: cafe.name, address: cafe.address, value: cafe.value })}
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        편집
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -636,24 +743,95 @@ export function AdminDashboard() {
             {participants.map((participant) => (
               <Card key={participant.id}>
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-2">
-                      <h4 className="font-semibold">{participant.name}</h4>
-                      {participant.instagram && (
-                        <p className="text-sm text-muted-foreground">
-                          @{participant.instagram}
-                        </p>
-                      )}
-                      {participant.cafe && (
-                        <Badge variant="outline" className="text-xs">
-                          {participant.cafe.name}
-                        </Badge>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        가입일: {new Date(participant.createdAt).toLocaleDateString('ko-KR')}
-                      </p>
+                  {editingParticipant?.id === participant.id ? (
+                    // Edit mode
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor={`edit-participant-name-${participant.id}`}>이름</Label>
+                        <Input
+                          id={`edit-participant-name-${participant.id}`}
+                          value={editingParticipant.name}
+                          onChange={(e) => setEditingParticipant({ ...editingParticipant, name: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`edit-participant-instagram-${participant.id}`}>인스타그램 ID</Label>
+                        <Input
+                          id={`edit-participant-instagram-${participant.id}`}
+                          value={editingParticipant.instagram || ''}
+                          onChange={(e) => setEditingParticipant({ ...editingParticipant, instagram: e.target.value })}
+                          placeholder="@없이 입력하세요"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`edit-participant-cafe-${participant.id}`}>카페</Label>
+                        <Select
+                          value={editingParticipant.cafeId}
+                          onValueChange={(value) => setEditingParticipant({ ...editingParticipant, cafeId: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="카페를 선택하세요" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {cafes.map((cafe) => (
+                              <SelectItem key={cafe.id} value={cafe.id}>
+                                {cafe.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleUpdateParticipant(editingParticipant.id, editingParticipant.name, editingParticipant.instagram, editingParticipant.cafeId)}
+                          disabled={!editingParticipant.name || !editingParticipant.cafeId}
+                        >
+                          저장
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingParticipant(null)}
+                        >
+                          취소
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    // View mode
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2">
+                        <h4 className="font-semibold">{participant.name}</h4>
+                        {participant.instagram && (
+                          <p className="text-sm text-muted-foreground">
+                            @{participant.instagram}
+                          </p>
+                        )}
+                        {participant.cafe && (
+                          <Badge variant="outline" className="text-xs">
+                            {participant.cafe.name}
+                          </Badge>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          가입일: {new Date(participant.createdAt).toLocaleDateString('ko-KR')}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingParticipant({ 
+                          id: participant.id, 
+                          name: participant.name, 
+                          instagram: participant.instagram || '', 
+                          cafeId: participant.cafeId 
+                        })}
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        편집
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

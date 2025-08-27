@@ -160,6 +160,33 @@ export async function createCafe(
   }
 }
 
+export async function updateCafe(
+  id: string,
+  name: string,
+  address: string,
+  value?: number
+) {
+  try {
+    const [updatedCafe] = await db
+      .update(cafe)
+      .set({
+        name,
+        address,
+        value,
+        updatedAt: new Date(),
+      })
+      .where(eq(cafe.id, id))
+      .returning();
+
+    revalidatePath("/admin");
+
+    return updatedCafe;
+  } catch (error) {
+    console.error("Error updating cafe:", error);
+    throw new Error("카페 수정 중 오류가 발생했습니다.");
+  }
+}
+
 // Participant Actions
 export async function getParticipants(search?: string): Promise<Participant[]> {
   try {
@@ -222,6 +249,34 @@ export async function createParticipant(
   } catch (error) {
     console.error("Error creating participant:", error);
     throw new Error("참가자 생성 중 오류가 발생했습니다.");
+  }
+}
+
+export async function updateParticipant(
+  id: string,
+  name: string,
+  instagram: string,
+  cafeId: string
+) {
+  try {
+    const [updatedParticipant] = await db
+      .update(participant)
+      .set({
+        name,
+        instagram,
+        cafeId,
+        updatedAt: new Date(),
+      })
+      .where(eq(participant.id, id))
+      .returning();
+
+    revalidatePath("/contact");
+    revalidatePath("/admin");
+
+    return updatedParticipant;
+  } catch (error) {
+    console.error("Error updating participant:", error);
+    throw new Error("참가자 수정 중 오류가 발생했습니다.");
   }
 }
 
