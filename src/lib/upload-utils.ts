@@ -1,6 +1,7 @@
 'use client';
 
-import { supabase, STORAGE_BUCKET } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+import { STORAGE_BUCKET } from '@/lib/supabase/client';
 import { createGuestPhoto } from '@/lib/actions';
 import { optimizeImage, generateThumbnail, removeExifData } from '@/lib/image-utils';
 
@@ -27,6 +28,7 @@ export async function uploadImages(
   cafeId: string,
   onProgress: (progress: UploadProgress) => void
 ): Promise<{ success: boolean; uploadedCount: number; errors: string[] }> {
+  const supabase = createClient();
   const total = images.length;
   let completed = 0;
   const errors: string[] = [];
@@ -172,6 +174,7 @@ export async function uploadImages(
  * Creates storage bucket if it doesn't exist
  */
 export async function ensureStorageBucket(): Promise<void> {
+  const supabase = createClient();
   try {
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
     
