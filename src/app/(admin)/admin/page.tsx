@@ -1,30 +1,13 @@
-'use client';
-
 import { Button } from '@/components/ui/button';
 import { AdminDashboard } from '@/components/admin-dashboard';
-import { ArrowLeft, Shield, AlertTriangle, LogOut, User } from 'lucide-react';
+import { ArrowLeft, Shield, AlertTriangle, User } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/lib/auth-context';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { AdminLogoutButton } from '@/components/admin-logout-button';
+import { getCurrentUser } from '@/lib/auth-actions';
 import Link from 'next/link';
 
-export default function AdminPage() {
-  const { user, signOut } = useAuth();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const handleLogout = async () => {
-    try {
-      setIsLoggingOut(true);
-      await signOut();
-      toast.success('로그아웃 되었습니다.');
-    } catch (error) {
-      toast.error('로그아웃 중 오류가 발생했습니다.');
-      console.error('Logout error:', error);
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
+export default async function AdminPage() {
+  const user = await getCurrentUser();
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,15 +37,7 @@ export default function AdminPage() {
               <User className="h-4 w-4 mr-2" />
               {user?.email}
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
-            </Button>
+            <AdminLogoutButton />
           </div>
         </div>
 
