@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
-import { logoutAction } from '@/lib/auth-actions';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { logoutAction } from "@/lib/auth-actions";
+import { useState } from "react";
+import { toast } from "sonner";
+import { NextResponse } from "next/server";
 
 export function AdminLogoutButton() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -13,24 +14,21 @@ export function AdminLogoutButton() {
     try {
       setIsLoggingOut(true);
       await logoutAction();
-      toast.success('로그아웃 되었습니다.');
-    } catch (error) {
-      toast.error('로그아웃 중 오류가 발생했습니다.');
-      console.error('Logout error:', error);
+      toast.success("로그아웃 되었습니다.");
     } finally {
       setIsLoggingOut(false);
     }
   };
 
   return (
-    <Button 
-      variant="outline" 
-      size="sm" 
+    <Button
+      variant="outline"
+      size="sm"
       onClick={handleLogout}
       disabled={isLoggingOut}
     >
       <LogOut className="h-4 w-4 mr-2" />
-      {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
+      {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
     </Button>
   );
 }
