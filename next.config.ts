@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  // 정적 생성 문제 해결 - 배포환경에서 모달 라우트 작동을 위해 제거
+  // output: 'standalone',
   images: {
     remotePatterns: [
       {

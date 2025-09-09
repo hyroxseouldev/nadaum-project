@@ -3,6 +3,9 @@ import ParticipantCard from "@/components/participant-card";
 import ModalPageLayout from "@/components/modal-page-layout";
 import { getCafes, getParticipants } from "@/lib/actions";
 
+// 배포환경 모달 라우팅 문제 해결을 위한 dynamic export
+export const dynamic = 'force-dynamic';
+
 export default async function ContactModal() {
   const cafes = await getCafes();
   const serverParticipants = await getParticipants();

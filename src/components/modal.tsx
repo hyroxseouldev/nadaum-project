@@ -10,7 +10,12 @@ export default function Modal({ children }: { children: React.ReactNode }) {
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      router.back();
+      // 배포환경에서 router.back() 문제 해결
+      if (window.history.length > 1) {
+        router.back();
+      } else {
+        router.push('/');
+      }
     }
     setOpen(open);
   };

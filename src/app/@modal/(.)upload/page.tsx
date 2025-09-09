@@ -5,6 +5,9 @@ import Modal from "@/components/modal";
 import UploadFormModal from "@/components/upload-form-modal";
 import ModalPageLayout from "@/components/modal-page-layout";
 
+// 배포환경 모달 라우팅 문제 해결을 위한 dynamic export
+export const dynamic = 'force-dynamic';
+
 export default async function UploadModal({
   searchParams,
 }: {
