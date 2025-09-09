@@ -3,29 +3,31 @@ import MainFloatingActionButton from "@/components/main-floating-action-button";
 // 가로 최대값이 최대 400px 이고 그 이상이 되면 가운데 정렬이 되도록 하는 레이아웃 컴포넌트
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="max-w-[500px] mx-auto h-screen relative">
+    <div className="max-w-[500px] mx-auto h-screen flex flex-col relative">
       {children}
-      {/* // contact, media, upload 로 가는 링크 버튼 3개 가 화면의 우측 하단에 고정되어 있어야 합니다. */}
-      <div className="absolute bottom-5 right-4 flex gap-1">
-        <MainFloatingActionButton
-          href="/contact"
-          imageSrc="/logo/logo.png"
-          imageWidth={100}
-          imageHeight={100}
-          buttonClassName="p-1.5"
-        />
-        <MainFloatingActionButton
-          href="/media"
-          imageSrc="/logo/arrow.png"
-          imageWidth={24}
-          imageHeight={24}
-        />
-        <MainFloatingActionButton
-          href="/upload?uploadValue=401"
-          imageSrc="/logo/plus.png"
-          imageWidth={24}
-          imageHeight={24}
-        />
+      {/* Floating action buttons fixed to viewport */}
+      <div className="fixed bottom-5 right-1/2 transform translate-x-1/2 max-w-[500px] w-full">
+        <div className="flex gap-1 justify-end pr-4">
+          <MainFloatingActionButton
+            href="/contact"
+            imageSrc="/logo/logo.png"
+            imageWidth={100}
+            imageHeight={100}
+            buttonClassName="p-1.5"
+          />
+          <MainFloatingActionButton
+            href="/media"
+            imageSrc="/logo/arrow.png"
+            imageWidth={24}
+            imageHeight={24}
+          />
+          <MainFloatingActionButton
+            href="/upload?uploadValue=401"
+            imageSrc="/logo/plus.png"
+            imageWidth={24}
+            imageHeight={24}
+          />
+        </div>
       </div>
     </div>
   );

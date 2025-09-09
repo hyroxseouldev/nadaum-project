@@ -1,6 +1,6 @@
 import { GuestPhotoFeed } from "@/components/guest-photo-feed";
 import MainLayout from "@/components/main-layout";
-import { getCafes, getGuestPhotos } from "@/lib/actions";
+import { getCafes } from "@/lib/actions";
 import Link from "next/link";
 
 // searchParams 타입 정의
@@ -14,22 +14,27 @@ export default async function Home({ searchParams }: HomeProps) {
     cafes.find((cafe) => cafe.value === Number(cafeValue))?.id || undefined;
   return (
     <MainLayout>
-      {/* // 카페 목록 및 필터링 기능 추가 */}
-      {/* {카페 아이디가 없으면 ALL 띄움 } */}
-      <div>
-        <ul className="flex gap-4.5 px-2 py-3">
-          {/* // 크기 14px, 굵기 400, 색상 #000000 */}
-          <li className="text-sm font-normal text-[#000000]">
+      {/* Sticky navigation header */}
+      <div className="sticky top-0 bg-white z-10">
+        <ul className="flex gap-4.5 px-2 py-3 overflow-x-auto">
+          <li className="text-sm font-normal text-[#000000] whitespace-nowrap">
             <Link href={`/`}>ALL</Link>
           </li>
           {cafes.map((cafe) => (
-            <li key={cafe.id} className="text-sm font-normal text-[#000000]">
+            <li
+              key={cafe.id}
+              className="text-sm font-normal text-[#000000] whitespace-nowrap"
+            >
               <Link href={`/?cafeValue=${cafe.value}`}>{cafe.name}</Link>
             </li>
           ))}
         </ul>
       </div>
-      <GuestPhotoFeed selectedCafeId={cafeId} />
+
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto pb-20">
+        <GuestPhotoFeed selectedCafeId={cafeId} />
+      </div>
     </MainLayout>
   );
 }
