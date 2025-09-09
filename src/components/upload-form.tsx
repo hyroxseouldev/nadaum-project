@@ -79,14 +79,6 @@ const UploadForm = ({ selectedCafe }: UploadFormProps) => {
 
       if (result.success) {
         toast.success(`${result.uploadedCount}개의 이미지가 업로드되었습니다!`);
-
-        // Clear form after successful upload
-        setTimeout(() => {
-          setImages([]);
-          setAgreed(false);
-          setShowProgress(false);
-          setUploading(false);
-        }, 2000);
       } else {
         toast.error("업로드에 실패했습니다.");
         setError("업로드 중 오류가 발생했습니다.");
@@ -105,14 +97,7 @@ const UploadForm = ({ selectedCafe }: UploadFormProps) => {
   const handleProgressClose = () => {
     setShowProgress(false);
     setUploading(false);
-
-    // Redirect to home page after successful upload
-    if (
-      uploadProgress.stage === "completed" &&
-      uploadProgress.errors.length === 0
-    ) {
-      router.push("/");
-    }
+    router.push("/");
   };
 
   return (
