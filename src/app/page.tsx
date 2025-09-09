@@ -12,7 +12,6 @@ export default async function Home({ searchParams }: HomeProps) {
   const cafes = await getCafes();
   const cafeId =
     cafes.find((cafe) => cafe.value === Number(cafeValue))?.id || undefined;
-  const photoList = await getGuestPhotos(0, cafeId);
   return (
     <MainLayout>
       {/* // 카페 목록 및 필터링 기능 추가 */}

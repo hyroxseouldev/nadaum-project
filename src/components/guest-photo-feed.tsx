@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getGuestPhotos } from '@/lib/actions';
-import { useIntersection } from '@/hooks/use-intersection';
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getGuestPhotos } from "@/lib/actions";
+import { useIntersection } from "@/hooks/use-intersection";
 
 interface GuestPhoto {
   id: string;
@@ -33,32 +33,39 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
   const [page, setPage] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const loadPhotos = useCallback(async (pageNum: number, cafeId?: string, reset = false) => {
-    try {
-      if (reset) {
-        setLoading(true);
-        setError(null);
-      } else {
-        setLoadingMore(true);
-      }
+  const loadPhotos = useCallback(
+    async (pageNum: number, cafeId?: string, reset = false) => {
+      try {
+        if (reset) {
+          setLoading(true);
+          setError(null);
+        } else {
+          setLoadingMore(true);
+        }
 
-      const result = await getGuestPhotos(pageNum, cafeId);
-      
-      if (reset) {
-        setPhotos(result.data);
-      } else {
-        setPhotos(prev => [...prev, ...result.data]);
+        const result = await getGuestPhotos(pageNum, cafeId);
+
+        if (reset) {
+          setPhotos(result.data);
+        } else {
+          setPhotos((prev) => [...prev, ...result.data]);
+        }
+
+        setHasMore(result.hasMore);
+        setPage(pageNum);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "사진을 불러오는 중 오류가 발생했습니다."
+        );
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-      
-      setHasMore(result.hasMore);
-      setPage(pageNum);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '사진을 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   // Load initial photos
   useEffect(() => {
@@ -71,7 +78,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
   // Intersection observer for infinite scroll
   const { ref, isIntersecting } = useIntersection({
     threshold: 0.1,
-    rootMargin: '100px',
+    rootMargin: "100px",
   });
 
   // Load more photos when reaching bottom
@@ -79,19 +86,33 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
     if (isIntersecting && hasMore && !loadingMore && !loading) {
       loadPhotos(page + 1, selectedCafeId);
     }
-  }, [isIntersecting, hasMore, loadingMore, loading, page, selectedCafeId, loadPhotos]);
+  }, [
+    isIntersecting,
+    hasMore,
+    loadingMore,
+    loading,
+    page,
+    selectedCafeId,
+    loadPhotos,
+  ]);
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div 
+        className="columns-2 gap-1"
+        style={{
+          columnFill: 'balance',
+        }}
+      >
         {Array.from({ length: 8 }).map((_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <Skeleton className="aspect-square w-full" />
-            <div className="p-3">
-              <Skeleton className="h-4 w-20 mb-2" />
-              <Skeleton className="h-3 w-32" />
-            </div>
-          </Card>
+          <div key={i} className="break-inside-avoid mb-1">
+            <Skeleton 
+              className="w-full rounded-md" 
+              style={{ 
+                height: `${200 + (i % 3) * 100}px` // Varying heights for masonry effect
+              }} 
+            />
+          </div>
         ))}
       </div>
     );
@@ -114,7 +135,9 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
   if (photos.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground mb-4">아직 게스트 포토가 없습니다.</p>
+        <p className="text-muted-foreground mb-4">
+          아직 게스트 포토가 없습니다.
+        </p>
         <p className="text-sm text-muted-foreground">
           첫 번째 게스트 포토를 업로드해보세요!
         </p>
@@ -124,51 +147,52 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
 
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+      <div 
+        className="columns-2 gap-1 mb-8"
+        style={{
+          columnFill: 'balance',
+        }}
+      >
         {photos.map((photo) => (
-          <Card key={photo.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
-            <div className="relative aspect-square">
-              <Image
-                src={photo.imageUrl}
-                alt={`Guest photo at ${photo.cafe?.name || 'Unknown cafe'}`}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-200"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                loading="lazy"
-              />
-            </div>
-            <div className="p-3">
-              {photo.cafe && (
-                <>
-                  <Badge variant="secondary" className="mb-2">
-                    {photo.cafe.name}
-                  </Badge>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {photo.cafe.address}
-                  </p>
-                </>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">
-                {new Date(photo.createdAt).toLocaleDateString('ko-KR')}
-              </p>
-            </div>
-          </Card>
+          <div
+            key={photo.id}
+            className="break-inside-avoid mb-1 overflow-hidden group"
+          >
+            <Image
+              src={photo.imageUrl}
+              alt={`Guest photo at ${photo.cafe?.name || "Unknown cafe"}`}
+              width={400}
+              height={600}
+              className="w-full h-auto object-cover rounded-md group-hover:opacity-90 transition-opacity duration-200"
+              sizes="50vw"
+              loading="lazy"
+              style={{
+                aspectRatio: 'auto',
+              }}
+            />
+          </div>
         ))}
       </div>
 
       {/* Loading more indicator */}
       {hasMore && (
-        <div ref={ref} className="flex justify-center py-8">
+        <div ref={ref} className="py-8">
           {loadingMore && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+            <div 
+              className="columns-2 gap-1 w-full"
+              style={{
+                columnFill: 'balance',
+              }}
+            >
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <Skeleton className="aspect-square w-full" />
-                  <div className="p-3">
-                    <Skeleton className="h-4 w-20 mb-2" />
-                    <Skeleton className="h-3 w-32" />
-                  </div>
-                </Card>
+                <div key={i} className="break-inside-avoid mb-1">
+                  <Skeleton 
+                    className="w-full rounded-md" 
+                    style={{ 
+                      height: `${200 + (i % 3) * 100}px` // Varying heights for masonry effect
+                    }} 
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -177,7 +201,9 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
 
       {!hasMore && photos.length > 0 && (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">모든 게스트 포토를 확인했습니다.</p>
+          <p className="text-muted-foreground">
+            모든 게스트 포토를 확인했습니다.
+          </p>
         </div>
       )}
     </div>
