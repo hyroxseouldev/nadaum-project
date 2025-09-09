@@ -1,41 +1,82 @@
-'use client';
+import Modal from "@/components/modal";
+import ParticipantCard from "@/components/participant-card";
+import ModalPageLayout from "@/components/modal-page-layout";
+import { getCafes, getParticipants } from "@/lib/actions";
 
-import Modal from '@/components/modal';
-import { ParticipantList } from '@/components/participant-list';
-import { Users, UserPlus } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+export default async function ContactModal() {
+  const cafes = await getCafes();
+  const serverParticipants = await getParticipants();
+  const participants = [
+    {
+      position: "기획, 운영, 제빵",
+      name: "김지은",
+      instagram: "@prissy__1995",
+    },
+    {
+      position: "기획, 운영, 브루잉, 로스팅",
+      name: "최광현",
+      instagram: "@rhkdgus",
+    },
 
-export default function ContactModal() {
+    {
+      position: "기획, 운영, 로스팅",
+      name: "하청비",
+      instagram: "@wannabi",
+    },
+
+    {
+      position: "기획, 디자인, 웹, 영상 제작",
+      name: "신동욱",
+      instagram: "@uxshin",
+    },
+    {
+      position: "Special Thanks.",
+      name: "박근하",
+      instagram: "@geunhapark",
+    },
+  ];
   return (
     <Modal>
-      <div className="p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center">
-              <Users className="h-6 w-6 mr-2 text-primary" />
-              참가자 정보
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              게스트 포토 플랫폼에 참여한 사용자들의 정보를 확인하세요
-            </p>
+      <ModalPageLayout subTitle="CREDIT">
+        <div>
+          <div className="flex flex-col gap-2">
+            {participants.map((participant) => (
+              <ParticipantCard key={participant.name} {...participant} />
+            ))}
+          </div>
+          {/* // 2열 그리드 영역  */}
+          <div className="grid grid-cols-2 gap-2 mt-6">
+            {cafes.map((cafe) => (
+              <div key={cafe.id} className="flex flex-col items-center p-4">
+                <p className="text-[10px] font-normal text-[#000000] mb-2">
+                  {cafe.name}
+                </p>
+                <div className="flex flex-col gap-2">
+                  {/* // 참가자가 없을때, 예외처리  */}
+                  {serverParticipants.filter(
+                    (participant) => participant.cafeId === cafe.id
+                  ).length === 0 ? (
+                    <p className="text-[10px] font-normal text-[#000000]">
+                      등록된 참가자가 없습니다.
+                    </p>
+                  ) : (
+                    serverParticipants
+                      .filter((participant) => participant.cafeId === cafe.id)
+                      .map((participant) => (
+                        <ParticipantCard
+                          key={participant.name}
+                          position={participant.position || ""}
+                          name={participant.name}
+                          instagram={participant.instagram || ""}
+                        />
+                      ))
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Quick Actions */}
-        <div className="mb-6 flex justify-center">
-          <Link href="/upload">
-            <Button variant="outline">
-              <UserPlus className="h-4 w-4 mr-2" />
-              게스트 포토 업로드
-            </Button>
-          </Link>
-        </div>
-
-        {/* Participant List */}
-        <ParticipantList />
-      </div>
+      </ModalPageLayout>
     </Modal>
   );
 }
