@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogOverlay,
   DialogTitle,
 } from "@/components/ui/dialog";
 
@@ -20,21 +19,9 @@ export default function Modal({ children }: { children: React.ReactNode }) {
     setOpen(open);
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        router.back();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [router]);
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTitle>Modal</DialogTitle>
-      {/* <DialogOverlay className="bg-transparent" /> */}
+      <DialogTitle className="sr-only">Modal</DialogTitle>
       <DialogContent
         className="max-h-[900px] w-full p-0 overflow-hidden mx-5 rounded-lg"
         showCloseButton={true}
