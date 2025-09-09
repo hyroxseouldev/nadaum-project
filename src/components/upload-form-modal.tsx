@@ -78,13 +78,14 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
       if (result.success) {
         toast.success(`${result.uploadedCount}개의 이미지가 업로드되었습니다!`);
 
-        // Clear form after successful upload
+        // Clear form after successful upload and navigate to main page with refresh
         setTimeout(() => {
           setImages([]);
           setAgreed(false);
           setShowProgress(false);
           setUploading(false);
           router.push("/");
+          router.refresh(); // Refresh the main page to show updated content
         }, 2000);
       } else {
         toast.error("업로드에 실패했습니다.");
@@ -105,12 +106,13 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
     setShowProgress(false);
     setUploading(false);
 
-    // Close modal after successful upload
+    // Navigate to main page and refresh after successful upload
     if (
       uploadProgress.stage === "completed" &&
       uploadProgress.errors.length === 0
     ) {
       router.push("/");
+      router.refresh(); // Refresh the main page to show updated content
     }
   };
 
