@@ -84,7 +84,7 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
           setAgreed(false);
           setShowProgress(false);
           setUploading(false);
-          router.back(); // Close modal after successful upload
+          router.push("/");
         }, 2000);
       } else {
         toast.error("업로드에 실패했습니다.");
@@ -110,7 +110,7 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
       uploadProgress.stage === "completed" &&
       uploadProgress.errors.length === 0
     ) {
-      router.back();
+      router.push("/");
     }
   };
 
