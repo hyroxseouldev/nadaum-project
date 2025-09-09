@@ -1,15 +1,29 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getParticipants } from '@/lib/actions';
-import { Search, Users, MapPin, Instagram, AlertCircle, Filter, X } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState, useEffect, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getParticipants } from "@/lib/actions";
+import {
+  Search,
+  Users,
+  MapPin,
+  Instagram,
+  AlertCircle,
+  Filter,
+  X,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Participant {
   id: string;
@@ -17,6 +31,7 @@ interface Participant {
   instagram: string | null;
   cafeId: string;
   createdAt: Date;
+  position: string | null;
   cafe: {
     id: string;
     name: string;
@@ -28,8 +43,8 @@ export function ParticipantList() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCafeId, setSelectedCafeId] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCafeId, setSelectedCafeId] = useState<string>("all");
 
   // Load participants
   useEffect(() => {
@@ -40,8 +55,12 @@ export function ParticipantList() {
         setParticipants(participantList as unknown as Participant[]);
         setError(null);
       } catch (err) {
-        console.error('Error loading participants:', err);
-        setError(err instanceof Error ? err.message : '참가자 목록을 불러오는 중 오류가 발생했습니다.');
+        console.error("Error loading participants:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "참가자 목록을 불러오는 중 오류가 발생했습니다."
+        );
       } finally {
         setLoading(false);
       }
@@ -53,7 +72,7 @@ export function ParticipantList() {
   // Get unique cafes for filtering
   const uniqueCafes = useMemo(() => {
     const cafeMap = new Map();
-    participants.forEach(participant => {
+    participants.forEach((participant) => {
       if (participant.cafe) {
         cafeMap.set(participant.cafe.id, participant.cafe);
       }
@@ -68,28 +87,31 @@ export function ParticipantList() {
     // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase().trim();
-      filtered = filtered.filter(participant =>
-        participant.name.toLowerCase().includes(term) ||
-        participant.instagram?.toLowerCase().includes(term) ||
-        participant.cafe?.name.toLowerCase().includes(term) ||
-        participant.cafe?.address.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        (participant) =>
+          participant.name.toLowerCase().includes(term) ||
+          participant.instagram?.toLowerCase().includes(term) ||
+          participant.cafe?.name.toLowerCase().includes(term) ||
+          participant.cafe?.address.toLowerCase().includes(term)
       );
     }
 
     // Filter by cafe
-    if (selectedCafeId !== 'all') {
-      filtered = filtered.filter(participant => participant.cafeId === selectedCafeId);
+    if (selectedCafeId !== "all") {
+      filtered = filtered.filter(
+        (participant) => participant.cafeId === selectedCafeId
+      );
     }
 
     return filtered;
   }, [participants, searchTerm, selectedCafeId]);
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setSelectedCafeId('all');
+    setSearchTerm("");
+    setSelectedCafeId("all");
   };
 
-  const hasActiveFilters = searchTerm || selectedCafeId !== 'all';
+  const hasActiveFilters = searchTerm || selectedCafeId !== "all";
 
   if (loading) {
     return (
@@ -98,7 +120,7 @@ export function ParticipantList() {
           <Skeleton className="h-10 flex-1" />
           <Skeleton className="h-10 w-48" />
         </div>
-        
+
         <div className="grid gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i}>
@@ -175,16 +197,17 @@ export function ParticipantList() {
                 필터 초기화
               </Button>
             )}
-            
+
             {searchTerm && (
               <Badge variant="secondary" className="text-xs">
                 검색: {searchTerm}
               </Badge>
             )}
-            
-            {selectedCafeId !== 'all' && (
+
+            {selectedCafeId !== "all" && (
               <Badge variant="secondary" className="text-xs">
-                카페: {uniqueCafes.find(cafe => cafe.id === selectedCafeId)?.name}
+                카페:{" "}
+                {uniqueCafes.find((cafe) => cafe.id === selectedCafeId)?.name}
               </Badge>
             )}
           </div>
@@ -193,7 +216,8 @@ export function ParticipantList() {
             {filteredParticipants.length}명의 참가자
             {filteredParticipants.length !== participants.length && (
               <span className="text-primary">
-                {' '}(전체 {participants.length}명 중)
+                {" "}
+                (전체 {participants.length}명 중)
               </span>
             )}
           </div>
@@ -206,7 +230,9 @@ export function ParticipantList() {
           <CardContent className="text-center py-12">
             <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground mb-2">
-              {hasActiveFilters ? '검색 조건에 맞는 참가자가 없습니다.' : '아직 참가자가 없습니다.'}
+              {hasActiveFilters
+                ? "검색 조건에 맞는 참가자가 없습니다."
+                : "아직 참가자가 없습니다."}
             </p>
             {hasActiveFilters && (
               <Button variant="outline" size="sm" onClick={clearFilters}>
@@ -218,20 +244,27 @@ export function ParticipantList() {
       ) : (
         <div className="grid gap-4">
           {filteredParticipants.map((participant) => (
-            <Card key={participant.id} className="hover:shadow-md transition-shadow">
+            <Card
+              key={participant.id}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-3 flex-1">
                     {/* Name */}
                     <div>
-                      <h3 className="font-semibold text-lg">{participant.name}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {participant.name}
+                      </h3>
                     </div>
 
                     {/* Instagram */}
                     {participant.instagram && (
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Instagram className="h-4 w-4 mr-2" />
-                        <span className="font-mono">@{participant.instagram}</span>
+                        <span className="font-mono">
+                          @{participant.instagram}
+                        </span>
                       </div>
                     )}
 
@@ -243,18 +276,24 @@ export function ParticipantList() {
                         </Badge>
                         <div className="flex items-center text-sm text-muted-foreground">
                           <MapPin className="h-3 w-3 mr-1" />
-                          <span className="text-xs">{participant.cafe.address}</span>
+                          <span className="text-xs">
+                            {participant.cafe.address}
+                          </span>
                         </div>
                       </div>
                     )}
 
                     {/* Join Date */}
                     <div className="text-xs text-muted-foreground">
-                      참가일: {new Date(participant.createdAt).toLocaleDateString('ko-KR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
+                      참가일:{" "}
+                      {new Date(participant.createdAt).toLocaleDateString(
+                        "ko-KR",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
                     </div>
                   </div>
 
@@ -265,7 +304,12 @@ export function ParticipantList() {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0"
-                        onClick={() => window.open(`https://instagram.com/${participant.instagram}`, '_blank')}
+                        onClick={() =>
+                          window.open(
+                            `https://instagram.com/${participant.instagram}`,
+                            "_blank"
+                          )
+                        }
                       >
                         <Instagram className="h-4 w-4" />
                       </Button>
@@ -288,25 +332,34 @@ export function ParticipantList() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <p className="font-medium">총 참가자</p>
-                <p className="text-2xl font-bold text-primary">{participants.length}명</p>
+                <p className="text-2xl font-bold text-primary">
+                  {participants.length}명
+                </p>
               </div>
               <div>
                 <p className="font-medium">참여 카페</p>
-                <p className="text-2xl font-bold text-primary">{uniqueCafes.length}개</p>
+                <p className="text-2xl font-bold text-primary">
+                  {uniqueCafes.length}개
+                </p>
               </div>
               <div>
                 <p className="font-medium">인스타그램 연동</p>
                 <p className="text-2xl font-bold text-primary">
-                  {participants.filter(p => p.instagram).length}명
+                  {participants.filter((p) => p.instagram).length}명
                 </p>
               </div>
               <div>
                 <p className="font-medium">최근 참가</p>
                 <p className="text-sm text-muted-foreground">
                   {participants.length > 0
-                    ? new Date(Math.max(...participants.map(p => new Date(p.createdAt).getTime())))
-                        .toLocaleDateString('ko-KR')
-                    : '-'}
+                    ? new Date(
+                        Math.max(
+                          ...participants.map((p) =>
+                            new Date(p.createdAt).getTime()
+                          )
+                        )
+                      ).toLocaleDateString("ko-KR")
+                    : "-"}
                 </p>
               </div>
             </div>

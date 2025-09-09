@@ -196,6 +196,7 @@ export async function getParticipants(search?: string): Promise<Participant[]> {
         name: participant.name,
         instagram: participant.instagram,
         cafeId: participant.cafeId,
+        position: participant.position,
         createdAt: participant.createdAt,
         updatedAt: participant.updatedAt,
         cafe: {
@@ -230,7 +231,8 @@ export async function getParticipants(search?: string): Promise<Participant[]> {
 export async function createParticipant(
   name: string,
   instagram: string,
-  cafeId: string
+  cafeId: string,
+  position: string
 ) {
   try {
     const [newParticipant] = await db
@@ -239,6 +241,7 @@ export async function createParticipant(
         name,
         instagram,
         cafeId,
+        position,
       })
       .returning();
 
@@ -256,7 +259,8 @@ export async function updateParticipant(
   id: string,
   name: string,
   instagram: string,
-  cafeId: string
+  cafeId: string,
+  position: string
 ) {
   try {
     const [updatedParticipant] = await db
@@ -265,6 +269,7 @@ export async function updateParticipant(
         name,
         instagram,
         cafeId,
+        position,
         updatedAt: new Date(),
       })
       .where(eq(participant.id, id))

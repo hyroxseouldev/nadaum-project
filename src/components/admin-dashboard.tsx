@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useState, useEffect } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,19 +35,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  getAllGuestPhotos, 
-  deleteGuestPhoto, 
-  getCafes, 
+} from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  getAllGuestPhotos,
+  deleteGuestPhoto,
+  getCafes,
   createCafe,
   updateCafe,
   getParticipants,
   createParticipant,
   updateParticipant,
-  updateGuestPhoto
-} from '@/lib/actions';
+  updateGuestPhoto,
+} from "@/lib/actions";
 import {
   Camera,
   Check,
@@ -61,9 +61,9 @@ import {
   Filter,
   X,
   Edit,
-} from 'lucide-react';
-import Image from 'next/image';
-import { toast } from 'sonner';
+} from "lucide-react";
+import Image from "next/image";
+import { toast } from "sonner";
 
 interface GuestPhoto {
   id: string;
@@ -91,6 +91,7 @@ interface Participant {
   instagram: string | null;
   cafeId: string;
   createdAt: Date;
+  position: string | null;
   cafe: {
     id: string;
     name: string;
@@ -105,17 +106,35 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved'>('all');
-  
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "pending" | "approved"
+  >("all");
+
   // Form states
-  const [newCafe, setNewCafe] = useState({ name: '', address: '', value: '' });
-  const [newParticipant, setNewParticipant] = useState({ name: '', instagram: '', cafeId: '' });
+  const [newCafe, setNewCafe] = useState({ name: "", address: "", value: "" });
+  const [newParticipant, setNewParticipant] = useState({
+    name: "",
+    instagram: "",
+    cafeId: "",
+    position: "",
+  });
   const [showCafeDialog, setShowCafeDialog] = useState(false);
   const [showParticipantDialog, setShowParticipantDialog] = useState(false);
-  
+
   // Edit states
-  const [editingCafe, setEditingCafe] = useState<{id: string, name: string, address: string, value: number | null} | null>(null);
-  const [editingParticipant, setEditingParticipant] = useState<{id: string, name: string, instagram: string, cafeId: string} | null>(null);
+  const [editingCafe, setEditingCafe] = useState<{
+    id: string;
+    name: string;
+    address: string;
+    value: number | null;
+  } | null>(null);
+  const [editingParticipant, setEditingParticipant] = useState<{
+    id: string;
+    name: string;
+    instagram: string;
+    cafeId: string;
+    position: string;
+  } | null>(null);
   const [updatingPhotos, setUpdatingPhotos] = useState<Set<string>>(new Set());
 
   // Load data
@@ -127,14 +146,18 @@ export function AdminDashboard() {
         getCafes(),
         getParticipants(),
       ]);
-      
+
       setPhotos(photosData.data);
       setCafes(cafesData);
       setParticipants(participantsData as unknown as Participant[]);
       setError(null);
     } catch (err) {
-      console.error('Error loading admin data:', err);
-      setError(err instanceof Error ? err.message : '데이터를 불러오는 중 오류가 발생했습니다.');
+      console.error("Error loading admin data:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "데이터를 불러오는 중 오류가 발생했습니다."
+      );
     } finally {
       setLoading(false);
     }
@@ -144,37 +167,44 @@ export function AdminDashboard() {
     loadData();
   }, []);
 
-
   const handleDeletePhoto = async (photoId: string) => {
     try {
       await deleteGuestPhoto(photoId);
-      setPhotos(photos.filter(photo => photo.id !== photoId));
-      setSelectedPhotos(selectedPhotos.filter(id => id !== photoId));
-      toast.success('게스트 포토가 삭제되었습니다.');
+      setPhotos(photos.filter((photo) => photo.id !== photoId));
+      setSelectedPhotos(selectedPhotos.filter((id) => id !== photoId));
+      toast.success("게스트 포토가 삭제되었습니다.");
     } catch (error) {
-      toast.error('삭제 처리 중 오류가 발생했습니다.');
+      toast.error("삭제 처리 중 오류가 발생했습니다.");
     }
   };
 
   const handleBulkApprove = async () => {
     try {
-      await Promise.all(selectedPhotos.map(id => updateGuestPhoto(id, { adminApproval: true })));
+      await Promise.all(
+        selectedPhotos.map((id) =>
+          updateGuestPhoto(id, { adminApproval: true })
+        )
+      );
       loadData(); // Reload data to reflect changes
       setSelectedPhotos([]);
-      toast.success(`${selectedPhotos.length}개의 게스트 포토가 승인되었습니다.`);
+      toast.success(
+        `${selectedPhotos.length}개의 게스트 포토가 승인되었습니다.`
+      );
     } catch (error) {
-      toast.error('일괄 승인 처리 중 오류가 발생했습니다.');
+      toast.error("일괄 승인 처리 중 오류가 발생했습니다.");
     }
   };
 
   const handleBulkDelete = async () => {
     try {
-      await Promise.all(selectedPhotos.map(id => deleteGuestPhoto(id)));
-      setPhotos(photos.filter(photo => !selectedPhotos.includes(photo.id)));
+      await Promise.all(selectedPhotos.map((id) => deleteGuestPhoto(id)));
+      setPhotos(photos.filter((photo) => !selectedPhotos.includes(photo.id)));
       setSelectedPhotos([]);
-      toast.success(`${selectedPhotos.length}개의 게스트 포토가 삭제되었습니다.`);
+      toast.success(
+        `${selectedPhotos.length}개의 게스트 포토가 삭제되었습니다.`
+      );
     } catch (error) {
-      toast.error('일괄 삭제 처리 중 오류가 발생했습니다.');
+      toast.error("일괄 삭제 처리 중 오류가 발생했습니다.");
     }
   };
 
@@ -183,59 +213,80 @@ export function AdminDashboard() {
       const value = newCafe.value ? parseInt(newCafe.value) : undefined;
       const cafe = await createCafe(newCafe.name, newCafe.address, value);
       setCafes([...cafes, cafe]);
-      setNewCafe({ name: '', address: '', value: '' });
+      setNewCafe({ name: "", address: "", value: "" });
       setShowCafeDialog(false);
-      toast.success('새 카페가 추가되었습니다.');
+      toast.success("새 카페가 추가되었습니다.");
     } catch (error) {
-      toast.error('카페 추가 중 오류가 발생했습니다.');
+      toast.error("카페 추가 중 오류가 발생했습니다.");
     }
   };
 
   const handleCreateParticipant = async () => {
     try {
-      await createParticipant(newParticipant.name, newParticipant.instagram, newParticipant.cafeId);
+      await createParticipant(
+        newParticipant.name,
+        newParticipant.instagram,
+        newParticipant.cafeId,
+        newParticipant.position
+      );
       loadData(); // Reload to get participant with cafe info
-      setNewParticipant({ name: '', instagram: '', cafeId: '' });
+      setNewParticipant({ name: "", instagram: "", cafeId: "", position: "" });
       setShowParticipantDialog(false);
-      toast.success('새 참가자가 추가되었습니다.');
+      toast.success("새 참가자가 추가되었습니다.");
     } catch (error) {
-      toast.error('참가자 추가 중 오류가 발생했습니다.');
+      toast.error("참가자 추가 중 오류가 발생했습니다.");
     }
   };
 
   // Edit handlers
-  const handleUpdateCafe = async (id: string, name: string, address: string, value: number | null) => {
+  const handleUpdateCafe = async (
+    id: string,
+    name: string,
+    address: string,
+    value: number | null
+  ) => {
     try {
       await updateCafe(id, name, address, value || undefined);
       loadData();
       setEditingCafe(null);
-      toast.success('카페 정보가 수정되었습니다.');
+      toast.success("카페 정보가 수정되었습니다.");
     } catch (error) {
-      toast.error('카페 수정 중 오류가 발생했습니다.');
+      toast.error("카페 수정 중 오류가 발생했습니다.");
     }
   };
 
-  const handleUpdateParticipant = async (id: string, name: string, instagram: string, cafeId: string) => {
+  const handleUpdateParticipant = async (
+    id: string,
+    name: string,
+    instagram: string,
+    cafeId: string,
+    position: string
+  ) => {
     try {
-      await updateParticipant(id, name, instagram, cafeId);
+      await updateParticipant(id, name, instagram, cafeId, position);
       loadData();
       setEditingParticipant(null);
-      toast.success('참가자 정보가 수정되었습니다.');
+      toast.success("참가자 정보가 수정되었습니다.");
     } catch (error) {
-      toast.error('참가자 수정 중 오류가 발생했습니다.');
+      toast.error("참가자 수정 중 오류가 발생했습니다.");
     }
   };
 
-  const handleTogglePhotoApproval = async (id: string, currentStatus: boolean) => {
+  const handleTogglePhotoApproval = async (
+    id: string,
+    currentStatus: boolean
+  ) => {
     try {
-      setUpdatingPhotos(prev => new Set(prev).add(id));
+      setUpdatingPhotos((prev) => new Set(prev).add(id));
       await updateGuestPhoto(id, { adminApproval: !currentStatus });
       loadData();
-      toast.success(`게스트 포토가 ${!currentStatus ? '승인' : '승인 취소'}되었습니다.`);
+      toast.success(
+        `게스트 포토가 ${!currentStatus ? "승인" : "승인 취소"}되었습니다.`
+      );
     } catch (error) {
-      toast.error('게스트 포토 상태 변경 중 오류가 발생했습니다.');
+      toast.error("게스트 포토 상태 변경 중 오류가 발생했습니다.");
     } finally {
-      setUpdatingPhotos(prev => {
+      setUpdatingPhotos((prev) => {
         const newSet = new Set(prev);
         newSet.delete(id);
         return newSet;
@@ -243,11 +294,11 @@ export function AdminDashboard() {
     }
   };
 
-  const filteredPhotos = photos.filter(photo => {
+  const filteredPhotos = photos.filter((photo) => {
     switch (filterStatus) {
-      case 'pending':
+      case "pending":
         return !photo.adminApproval;
-      case 'approved':
+      case "approved":
         return photo.adminApproval;
       default:
         return true;
@@ -256,8 +307,8 @@ export function AdminDashboard() {
 
   const stats = {
     totalPhotos: photos.length,
-    pendingPhotos: photos.filter(p => !p.adminApproval).length,
-    approvedPhotos: photos.filter(p => p.adminApproval).length,
+    pendingPhotos: photos.filter((p) => !p.adminApproval).length,
+    approvedPhotos: photos.filter((p) => p.adminApproval).length,
     totalCafes: cafes.length,
     totalParticipants: participants.length,
   };
@@ -286,7 +337,12 @@ export function AdminDashboard() {
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           {error}
-          <Button variant="outline" size="sm" className="ml-4" onClick={loadData}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-4"
+            onClick={loadData}
+          >
             다시 시도
           </Button>
         </AlertDescription>
@@ -316,7 +372,9 @@ export function AdminDashboard() {
               <XCircle className="h-4 w-4 text-orange-500" />
               <div>
                 <p className="text-xs text-muted-foreground">승인 대기</p>
-                <p className="text-lg font-bold text-orange-600">{stats.pendingPhotos}</p>
+                <p className="text-lg font-bold text-orange-600">
+                  {stats.pendingPhotos}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -328,7 +386,9 @@ export function AdminDashboard() {
               <CheckCircle className="h-4 w-4 text-green-500" />
               <div>
                 <p className="text-xs text-muted-foreground">승인됨</p>
-                <p className="text-lg font-bold text-green-600">{stats.approvedPhotos}</p>
+                <p className="text-lg font-bold text-green-600">
+                  {stats.approvedPhotos}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -372,7 +432,12 @@ export function AdminDashboard() {
           {/* Photo Controls */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Select value={filterStatus} onValueChange={(value: 'all' | 'pending' | 'approved') => setFilterStatus(value)}>
+              <Select
+                value={filterStatus}
+                onValueChange={(value: "all" | "pending" | "approved") =>
+                  setFilterStatus(value)
+                }
+              >
                 <SelectTrigger className="w-40">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue />
@@ -383,7 +448,7 @@ export function AdminDashboard() {
                   <SelectItem value="approved">승인됨</SelectItem>
                 </SelectContent>
               </Select>
-              
+
               {selectedPhotos.length > 0 && (
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-muted-foreground">
@@ -402,14 +467,19 @@ export function AdminDashboard() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>정말 삭제하시겠습니까?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          정말 삭제하시겠습니까?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          선택된 {selectedPhotos.length}개의 게스트 포토가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+                          선택된 {selectedPhotos.length}개의 게스트 포토가
+                          영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>취소</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleBulkDelete}>삭제</AlertDialogAction>
+                        <AlertDialogAction onClick={handleBulkDelete}>
+                          삭제
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -430,16 +500,20 @@ export function AdminDashboard() {
                         if (checked) {
                           setSelectedPhotos([...selectedPhotos, photo.id]);
                         } else {
-                          setSelectedPhotos(selectedPhotos.filter(id => id !== photo.id));
+                          setSelectedPhotos(
+                            selectedPhotos.filter((id) => id !== photo.id)
+                          );
                         }
                       }}
                       className="bg-white/80 backdrop-blur"
                     />
                   </div>
-                  
+
                   <div className="absolute top-2 right-2 z-10">
-                    <Badge variant={photo.adminApproval ? 'default' : 'secondary'}>
-                      {photo.adminApproval ? '승인됨' : '대기중'}
+                    <Badge
+                      variant={photo.adminApproval ? "default" : "secondary"}
+                    >
+                      {photo.adminApproval ? "승인됨" : "대기중"}
                     </Badge>
                   </div>
 
@@ -462,15 +536,18 @@ export function AdminDashboard() {
                       </Badge>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      업로드: {new Date(photo.createdAt).toLocaleDateString('ko-KR')}
+                      업로드:{" "}
+                      {new Date(photo.createdAt).toLocaleDateString("ko-KR")}
                     </p>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2 mt-3">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant={photo.adminApproval ? "secondary" : "default"}
-                      onClick={() => handleTogglePhotoApproval(photo.id, photo.adminApproval)}
+                      onClick={() =>
+                        handleTogglePhotoApproval(photo.id, photo.adminApproval)
+                      }
                       disabled={updatingPhotos.has(photo.id)}
                     >
                       {updatingPhotos.has(photo.id) ? (
@@ -487,7 +564,7 @@ export function AdminDashboard() {
                         </>
                       )}
                     </Button>
-                    
+
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button size="sm" variant="destructive">
@@ -499,12 +576,15 @@ export function AdminDashboard() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>게스트 포토 삭제</AlertDialogTitle>
                           <AlertDialogDescription>
-                            이 게스트 포토를 영구적으로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+                            이 게스트 포토를 영구적으로 삭제하시겠습니까? 이
+                            작업은 되돌릴 수 없습니다.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>취소</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeletePhoto(photo.id)}>
+                          <AlertDialogAction
+                            onClick={() => handleDeletePhoto(photo.id)}
+                          >
                             삭제
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -521,9 +601,11 @@ export function AdminDashboard() {
               <CardContent className="text-center py-12">
                 <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">
-                  {filterStatus === 'all' ? '게스트 포토가 없습니다.' : 
-                   filterStatus === 'pending' ? '승인 대기 중인 포토가 없습니다.' :
-                   '승인된 포토가 없습니다.'}
+                  {filterStatus === "all"
+                    ? "게스트 포토가 없습니다."
+                    : filterStatus === "pending"
+                    ? "승인 대기 중인 포토가 없습니다."
+                    : "승인된 포토가 없습니다."}
                 </p>
               </CardContent>
             </Card>
@@ -537,8 +619,7 @@ export function AdminDashboard() {
             <Dialog open={showCafeDialog} onOpenChange={setShowCafeDialog}>
               <DialogTrigger asChild>
                 <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  새 카페 추가
+                  <Plus className="h-4 w-4 mr-2" />새 카페 추가
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -551,7 +632,9 @@ export function AdminDashboard() {
                     <Input
                       id="cafe-name"
                       value={newCafe.name}
-                      onChange={(e) => setNewCafe({ ...newCafe, name: e.target.value })}
+                      onChange={(e) =>
+                        setNewCafe({ ...newCafe, name: e.target.value })
+                      }
                       placeholder="카페명을 입력하세요"
                     />
                   </div>
@@ -560,7 +643,9 @@ export function AdminDashboard() {
                     <Textarea
                       id="cafe-address"
                       value={newCafe.address}
-                      onChange={(e) => setNewCafe({ ...newCafe, address: e.target.value })}
+                      onChange={(e) =>
+                        setNewCafe({ ...newCafe, address: e.target.value })
+                      }
                       placeholder="카페 주소를 입력하세요"
                     />
                   </div>
@@ -570,16 +655,21 @@ export function AdminDashboard() {
                       id="cafe-value"
                       type="number"
                       value={newCafe.value}
-                      onChange={(e) => setNewCafe({ ...newCafe, value: e.target.value })}
+                      onChange={(e) =>
+                        setNewCafe({ ...newCafe, value: e.target.value })
+                      }
                       placeholder="가격대를 입력하세요 (선택사항)"
                     />
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowCafeDialog(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCafeDialog(false)}
+                  >
                     취소
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleCreateCafe}
                     disabled={!newCafe.name || !newCafe.address}
                   >
@@ -598,35 +688,65 @@ export function AdminDashboard() {
                     // Edit mode
                     <div className="space-y-3">
                       <div>
-                        <Label htmlFor={`edit-cafe-name-${cafe.id}`}>카페명</Label>
+                        <Label htmlFor={`edit-cafe-name-${cafe.id}`}>
+                          카페명
+                        </Label>
                         <Input
                           id={`edit-cafe-name-${cafe.id}`}
                           value={editingCafe.name}
-                          onChange={(e) => setEditingCafe({ ...editingCafe, name: e.target.value })}
+                          onChange={(e) =>
+                            setEditingCafe({
+                              ...editingCafe,
+                              name: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`edit-cafe-address-${cafe.id}`}>주소</Label>
+                        <Label htmlFor={`edit-cafe-address-${cafe.id}`}>
+                          주소
+                        </Label>
                         <Input
                           id={`edit-cafe-address-${cafe.id}`}
                           value={editingCafe.address}
-                          onChange={(e) => setEditingCafe({ ...editingCafe, address: e.target.value })}
+                          onChange={(e) =>
+                            setEditingCafe({
+                              ...editingCafe,
+                              address: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`edit-cafe-value-${cafe.id}`}>가격대</Label>
+                        <Label htmlFor={`edit-cafe-value-${cafe.id}`}>
+                          가격대
+                        </Label>
                         <Input
                           id={`edit-cafe-value-${cafe.id}`}
                           type="number"
-                          value={editingCafe.value || ''}
-                          onChange={(e) => setEditingCafe({ ...editingCafe, value: e.target.value ? Number(e.target.value) : null })}
+                          value={editingCafe.value || ""}
+                          onChange={(e) =>
+                            setEditingCafe({
+                              ...editingCafe,
+                              value: e.target.value
+                                ? Number(e.target.value)
+                                : null,
+                            })
+                          }
                           placeholder="원"
                         />
                       </div>
                       <div className="flex space-x-2">
                         <Button
                           size="sm"
-                          onClick={() => handleUpdateCafe(editingCafe.id, editingCafe.name, editingCafe.address, editingCafe.value)}
+                          onClick={() =>
+                            handleUpdateCafe(
+                              editingCafe.id,
+                              editingCafe.name,
+                              editingCafe.address,
+                              editingCafe.value
+                            )
+                          }
                           disabled={!editingCafe.name || !editingCafe.address}
                         >
                           저장
@@ -658,7 +778,14 @@ export function AdminDashboard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setEditingCafe({ id: cafe.id, name: cafe.name, address: cafe.address, value: cafe.value })}
+                        onClick={() =>
+                          setEditingCafe({
+                            id: cafe.id,
+                            name: cafe.name,
+                            address: cafe.address,
+                            value: cafe.value,
+                          })
+                        }
                       >
                         <Edit className="h-3 w-3 mr-1" />
                         편집
@@ -675,11 +802,13 @@ export function AdminDashboard() {
         <TabsContent value="participants" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">참가자 관리</h3>
-            <Dialog open={showParticipantDialog} onOpenChange={setShowParticipantDialog}>
+            <Dialog
+              open={showParticipantDialog}
+              onOpenChange={setShowParticipantDialog}
+            >
               <DialogTrigger asChild>
                 <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  새 참가자 추가
+                  <Plus className="h-4 w-4 mr-2" />새 참가자 추가
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -692,7 +821,12 @@ export function AdminDashboard() {
                     <Input
                       id="participant-name"
                       value={newParticipant.name}
-                      onChange={(e) => setNewParticipant({ ...newParticipant, name: e.target.value })}
+                      onChange={(e) =>
+                        setNewParticipant({
+                          ...newParticipant,
+                          name: e.target.value,
+                        })
+                      }
                       placeholder="참가자 이름을 입력하세요"
                     />
                   </div>
@@ -701,15 +835,38 @@ export function AdminDashboard() {
                     <Input
                       id="participant-instagram"
                       value={newParticipant.instagram}
-                      onChange={(e) => setNewParticipant({ ...newParticipant, instagram: e.target.value })}
+                      onChange={(e) =>
+                        setNewParticipant({
+                          ...newParticipant,
+                          instagram: e.target.value,
+                        })
+                      }
                       placeholder="@없이 입력하세요 (선택사항)"
                     />
                   </div>
+                  {/* // Position add */}
+                  <div>
+                    <Label htmlFor="participant-position">계급</Label>
+                    <Input
+                      id="participant-position"
+                      value={newParticipant.position}
+                      onChange={(e) =>
+                        setNewParticipant({
+                          ...newParticipant,
+                          position: e.target.value,
+                        })
+                      }
+                      placeholder="계급을 입력하세요 (선택사항)"
+                    />
+                  </div>
+
                   <div>
                     <Label htmlFor="participant-cafe">카페 *</Label>
                     <Select
                       value={newParticipant.cafeId}
-                      onValueChange={(value) => setNewParticipant({ ...newParticipant, cafeId: value })}
+                      onValueChange={(value) =>
+                        setNewParticipant({ ...newParticipant, cafeId: value })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="카페를 선택하세요" />
@@ -725,10 +882,13 @@ export function AdminDashboard() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowParticipantDialog(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowParticipantDialog(false)}
+                  >
                     취소
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleCreateParticipant}
                     disabled={!newParticipant.name || !newParticipant.cafeId}
                   >
@@ -747,27 +907,67 @@ export function AdminDashboard() {
                     // Edit mode
                     <div className="space-y-3">
                       <div>
-                        <Label htmlFor={`edit-participant-name-${participant.id}`}>이름</Label>
+                        <Label
+                          htmlFor={`edit-participant-name-${participant.id}`}
+                        >
+                          이름
+                        </Label>
                         <Input
                           id={`edit-participant-name-${participant.id}`}
                           value={editingParticipant.name}
-                          onChange={(e) => setEditingParticipant({ ...editingParticipant, name: e.target.value })}
+                          onChange={(e) =>
+                            setEditingParticipant({
+                              ...editingParticipant,
+                              name: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`edit-participant-instagram-${participant.id}`}>인스타그램 ID</Label>
+                        <Label
+                          htmlFor={`edit-participant-instagram-${participant.id}`}
+                        >
+                          인스타그램 ID
+                        </Label>
                         <Input
                           id={`edit-participant-instagram-${participant.id}`}
-                          value={editingParticipant.instagram || ''}
-                          onChange={(e) => setEditingParticipant({ ...editingParticipant, instagram: e.target.value })}
+                          value={editingParticipant.instagram || ""}
+                          onChange={(e) =>
+                            setEditingParticipant({
+                              ...editingParticipant,
+                              instagram: e.target.value,
+                            })
+                          }
                           placeholder="@없이 입력하세요"
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`edit-participant-cafe-${participant.id}`}>카페</Label>
+                        <Label htmlFor="participant-position">계급</Label>
+                        <Input
+                          id="participant-position"
+                          value={editingParticipant.position || ""}
+                          onChange={(e) =>
+                            setEditingParticipant({
+                              ...editingParticipant,
+                              position: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor={`edit-participant-cafe-${participant.id}`}
+                        >
+                          카페
+                        </Label>
                         <Select
                           value={editingParticipant.cafeId}
-                          onValueChange={(value) => setEditingParticipant({ ...editingParticipant, cafeId: value })}
+                          onValueChange={(value) =>
+                            setEditingParticipant({
+                              ...editingParticipant,
+                              cafeId: value,
+                            })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="카페를 선택하세요" />
@@ -784,8 +984,19 @@ export function AdminDashboard() {
                       <div className="flex space-x-2">
                         <Button
                           size="sm"
-                          onClick={() => handleUpdateParticipant(editingParticipant.id, editingParticipant.name, editingParticipant.instagram, editingParticipant.cafeId)}
-                          disabled={!editingParticipant.name || !editingParticipant.cafeId}
+                          onClick={() =>
+                            handleUpdateParticipant(
+                              editingParticipant.id,
+                              editingParticipant.name,
+                              editingParticipant.instagram,
+                              editingParticipant.cafeId,
+                              editingParticipant.position
+                            )
+                          }
+                          disabled={
+                            !editingParticipant.name ||
+                            !editingParticipant.cafeId
+                          }
                         >
                           저장
                         </Button>
@@ -808,24 +1019,35 @@ export function AdminDashboard() {
                             @{participant.instagram}
                           </p>
                         )}
+                        {participant.position && (
+                          <p className="text-sm text-muted-foreground">
+                            {participant.position}
+                          </p>
+                        )}
                         {participant.cafe && (
                           <Badge variant="outline" className="text-xs">
                             {participant.cafe.name}
                           </Badge>
                         )}
                         <p className="text-xs text-muted-foreground">
-                          가입일: {new Date(participant.createdAt).toLocaleDateString('ko-KR')}
+                          가입일:{" "}
+                          {new Date(participant.createdAt).toLocaleDateString(
+                            "ko-KR"
+                          )}
                         </p>
                       </div>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setEditingParticipant({ 
-                          id: participant.id, 
-                          name: participant.name, 
-                          instagram: participant.instagram || '', 
-                          cafeId: participant.cafeId 
-                        })}
+                        onClick={() =>
+                          setEditingParticipant({
+                            id: participant.id,
+                            name: participant.name,
+                            instagram: participant.instagram || "",
+                            cafeId: participant.cafeId,
+                            position: participant.position || "",
+                          })
+                        }
                       >
                         <Edit className="h-3 w-3 mr-1" />
                         편집

@@ -25,10 +25,13 @@ export const cafe = pgTable("cafe", {
 export const participant = pgTable("participant", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
+  // 계급 추가
+  position: varchar("position", { length: 255 }),
   instagram: varchar("instagram", { length: 255 }),
   cafeId: uuid("cafe_id")
     .references(() => cafe.id, { onDelete: "cascade" })
     .notNull(),
+
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
