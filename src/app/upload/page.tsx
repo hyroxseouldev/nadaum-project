@@ -6,11 +6,11 @@ import { AlertCircle } from "lucide-react";
 export default async function UploadPage({
   searchParams,
 }: {
-  searchParams: Promise<{ value: string }>;
+  searchParams: Promise<{ uploadValue: string }>;
 }) {
   const cafeList = await getCafes();
-  const { value } = await searchParams;
-  const selectedCafe = cafeList.find((cafe) => cafe.value === Number(value));
+  const { uploadValue } = await searchParams;
+  const selectedCafe = cafeList.find((cafe) => cafe.value === Number(uploadValue));
   if (!selectedCafe) {
     return (
       <Alert variant="destructive">
