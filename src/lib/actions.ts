@@ -112,6 +112,47 @@ export async function updateGuestPhoto(id: string, data: Partial<Guestphoto>) {
 
 export async function deleteGuestPhoto(id: string) {
   try {
+    // First, get the photo record to get the imageUrl
+    const [photoRecord] = await db
+      .select({ imageUrl: guestphoto.imageUrl })
+      .from(guestphoto)
+      .where(eq(guestphoto.id, id));
+
+    if (photoRecord?.imageUrl) {
+      // Extract file path from the Supabase Storage URL
+      const url = new URL(photoRecord.imageUrl);
+      const pathSegments = url.pathname.split('/');
+      
+      // URL format: /storage/v1/object/public/guest-photos/images/filename.webp
+      const bucketIndex = pathSegments.findIndex(segment => segment === 'guest-photos');
+      if (bucketIndex !== -1 && bucketIndex + 1 < pathSegments.length) {
+        const filePath = pathSegments.slice(bucketIndex + 1).join('/');
+        
+        // Try to delete from storage (server-side)
+        try {
+          const { createClient } = await import('@/lib/supabase/server');
+          const supabase = await createClient();
+          
+          // Delete main image
+          await supabase.storage
+            .from('guest-photos')
+            .remove([filePath]);
+
+          // Try to delete thumbnail if it exists
+          if (filePath.startsWith('images/')) {
+            const thumbnailPath = filePath.replace('images/', 'thumbnails/');
+            await supabase.storage
+              .from('guest-photos')
+              .remove([thumbnailPath]);
+          }
+        } catch (storageError) {
+          console.warn("Warning: Could not delete files from storage:", storageError);
+          // Continue with database deletion even if storage deletion fails
+        }
+      }
+    }
+
+    // Delete the database record
     await db.delete(guestphoto).where(eq(guestphoto.id, id));
 
     revalidatePath("/");
