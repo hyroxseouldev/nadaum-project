@@ -5,7 +5,7 @@ import { GuestPhotoFeed } from "@/components/guest-photo-feed";
 import { CafeFilter } from "@/components/cafe-filter";
 import { UploadButton } from "@/components/upload-button";
 import { Button } from "@/components/ui/button";
-import { Camera, Users, Shield } from "lucide-react";
+import { Camera, Users, Shield, Upload, Film } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
@@ -41,7 +41,6 @@ export default function Home() {
           </div>
         </div>
       </header>
-
       <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title & Description */}
         <div className="text-center mb-8">
@@ -93,7 +92,27 @@ export default function Home() {
           </div>
         </div>
       </main>
-
+      contact, media, upload 로 가는 링크 버튼 3개
+      <div>
+        <Link href="/contact">
+          <Button variant="outline" size="sm">
+            <Users className="h-4 w-4 mr-1" />
+            참가자
+          </Button>
+        </Link>
+        <Link href="/media">
+          <Button variant="outline" size="sm">
+            <Film className="h-4 w-4 mr-1" />
+            미디어
+          </Button>
+        </Link>
+        <Link href="/upload">
+          <Button variant="outline" size="sm">
+            <Upload className="h-4 w-4 mr-1" />
+            업로드
+          </Button>
+        </Link>
+      </div>
       {/* Footer */}
       <footer className="border-t bg-background/50 backdrop-blur">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
