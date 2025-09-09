@@ -4,7 +4,6 @@ import { AlertCircle } from "lucide-react";
 import Modal from "@/components/modal";
 import UploadFormModal from "@/components/upload-form-modal";
 import ModalPageLayout from "@/components/modal-page-layout";
-import { Checkbox } from "@/components/ui/checkbox";
 
 export default async function UploadModal({
   searchParams,

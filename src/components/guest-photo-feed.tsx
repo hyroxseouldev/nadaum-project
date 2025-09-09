@@ -98,19 +98,19 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
 
   if (loading) {
     return (
-      <div 
+      <div
         className="columns-2 gap-1"
         style={{
-          columnFill: 'balance',
+          columnFill: "balance",
         }}
       >
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="break-inside-avoid mb-1">
-            <Skeleton 
-              className="w-full rounded-md" 
-              style={{ 
-                height: `${200 + (i % 3) * 100}px` // Varying heights for masonry effect
-              }} 
+            <Skeleton
+              className="w-full rounded-md"
+              style={{
+                height: `${200 + (i % 3) * 100}px`, // Varying heights for masonry effect
+              }}
             />
           </div>
         ))}
@@ -147,10 +147,10 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
 
   return (
     <div>
-      <div 
+      <div
         className="columns-2 gap-1 mb-8"
         style={{
-          columnFill: 'balance',
+          columnFill: "balance",
         }}
       >
         {photos.map((photo) => (
@@ -167,7 +167,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
               sizes="50vw"
               loading="lazy"
               style={{
-                aspectRatio: 'auto',
+                aspectRatio: "auto",
               }}
             />
           </div>
@@ -178,19 +178,19 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
       {hasMore && (
         <div ref={ref} className="py-8">
           {loadingMore && (
-            <div 
+            <div
               className="columns-2 gap-1 w-full"
               style={{
-                columnFill: 'balance',
+                columnFill: "balance",
               }}
             >
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="break-inside-avoid mb-1">
-                  <Skeleton 
-                    className="w-full rounded-md" 
-                    style={{ 
-                      height: `${200 + (i % 3) * 100}px` // Varying heights for masonry effect
-                    }} 
+                  <Skeleton
+                    className="w-full rounded-md"
+                    style={{
+                      height: `${200 + (i % 3) * 100}px`, // Varying heights for masonry effect
+                    }}
                   />
                 </div>
               ))}
@@ -199,13 +199,13 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
         </div>
       )}
 
-      {!hasMore && photos.length > 0 && (
+      {/* {!hasMore && photos.length > 0 && (
         <div className="text-center py-8">
           <p className="text-muted-foreground">
             모든 게스트 포토를 확인했습니다.
           </p>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
