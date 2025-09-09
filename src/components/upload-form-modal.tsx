@@ -116,19 +116,6 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold flex items-center">
-          <Camera className="h-6 w-6 mr-2 text-primary" />
-          게스트 포토 업로드
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          {selectedCafe
-            ? `${selectedCafe.name}에서의 특별한 순간을 공유해보세요`
-            : "카페에서의 특별한 순간을 다른 사람들과 공유해보세요"}
-        </p>
-      </div>
-
       {/* Error Alert */}
       {error && (
         <Alert variant="destructive" className="mb-6">
@@ -138,6 +125,12 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
       )}
 
       <div className="space-y-6">
+        {/* Terms Agreement */}
+        <TermsAgreement
+          agreed={agreed}
+          onAgreeChange={setAgreed}
+          disabled={uploading}
+        />
         {/* Image Upload Section */}
         <Card>
           <CardHeader>
@@ -149,35 +142,6 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
               maxFileSize={10}
               acceptedTypes={["image/jpeg", "image/png", "image/webp"]}
               onImagesChange={setImages}
-              disabled={uploading}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Selected Cafe Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>선택된 카페</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="p-4 bg-muted/30 rounded-lg">
-              <div className="font-medium">{selectedCafe.name}</div>
-              <div className="text-sm text-muted-foreground">
-                {selectedCafe.address}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Terms Agreement */}
-        <Card>
-          <CardHeader>
-            <CardTitle>약관 동의</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TermsAgreement
-              agreed={agreed}
-              onAgreeChange={setAgreed}
               disabled={uploading}
             />
           </CardContent>
@@ -195,42 +159,15 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
             {uploading ? "업로드 중..." : `${images.length}개 이미지 업로드`}
           </Button>
 
-          <Button 
-            variant="outline" 
-            size="lg" 
+          <Button
+            variant="outline"
+            size="lg"
             onClick={() => router.back()}
             disabled={uploading}
           >
             취소
           </Button>
         </div>
-
-        {/* Upload Requirements */}
-        <Card className="bg-muted/30">
-          <CardContent className="pt-6">
-            <h3 className="font-semibold mb-3">업로드 전 확인사항</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start space-x-2">
-                <span className="text-primary mt-1">•</span>
-                <span>
-                  타인의 초상권을 침해하지 않는 이미지인지 확인해주세요
-                </span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <span className="text-primary mt-1">•</span>
-                <span>부적절한 내용이 포함되지 않았는지 확인해주세요</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <span className="text-primary mt-1">•</span>
-                <span>업로드된 이미지는 관리자 검토 후 공개됩니다</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <span className="text-primary mt-1">•</span>
-                <span>이미지는 자동으로 최적화되어 저장됩니다</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Upload Progress Modal */}

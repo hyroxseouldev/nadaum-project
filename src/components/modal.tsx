@@ -36,10 +36,10 @@ export default function Modal({ children }: { children: React.ReactNode }) {
       <DialogTitle>Modal</DialogTitle>
       {/* <DialogOverlay className="bg-transparent" /> */}
       <DialogContent
-        className="max-h-[640px] w-full p-0 overflow-hidden mx-5 rounded-lg"
+        className="max-h-[900px] w-full p-0 overflow-hidden mx-5 rounded-lg"
         showCloseButton={true}
       >
-        <div className="overflow-y-auto max-h-[640px]">{children}</div>
+        <div className="overflow-y-auto max-h-[900px]">{children}</div>
       </DialogContent>
     </Dialog>
   );

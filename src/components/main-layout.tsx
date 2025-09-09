@@ -7,9 +7,25 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       {children}
       {/* // contact, media, upload 로 가는 링크 버튼 3개 가 화면의 우측 하단에 고정되어 있어야 합니다. */}
       <div className="absolute bottom-5 right-4 flex gap-1">
-        <MainFloatingActionButton href="/contact" imageSrc="/logo/logo.png" />
-        <MainFloatingActionButton href="/media" imageSrc="/logo/arrow.png" />
-        <MainFloatingActionButton href="/upload" imageSrc="/logo/plus.png" />
+        <MainFloatingActionButton
+          href="/contact"
+          imageSrc="/logo/logo.png"
+          imageWidth={100}
+          imageHeight={100}
+          buttonClassName="p-1.5"
+        />
+        <MainFloatingActionButton
+          href="/media"
+          imageSrc="/logo/arrow.png"
+          imageWidth={24}
+          imageHeight={24}
+        />
+        <MainFloatingActionButton
+          href="/upload?uploadValue=401"
+          imageSrc="/logo/plus.png"
+          imageWidth={24}
+          imageHeight={24}
+        />
       </div>
     </div>
   );
