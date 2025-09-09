@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getGuestPhotos } from "@/lib/actions";
 import { useIntersection } from "@/hooks/use-intersection";
@@ -99,7 +97,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
   if (loading) {
     return (
       <div
-        className="columns-2 gap-1"
+        className="columns-2 gap-1 p-2 sm:p-1"
         style={{
           columnFill: "balance",
         }}
@@ -148,7 +146,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
   return (
     <div>
       <div
-        className="columns-2 gap-1 mb-8"
+        className="columns-2 gap-1 mb-8 p-2 sm:p-1"
         style={{
           columnFill: "balance",
         }}
@@ -179,7 +177,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
         <div ref={ref} className="py-8">
           {loadingMore && (
             <div
-              className="columns-2 gap-1 w-full"
+              className="columns-2 gap-1 w-full p-2 sm:p-1"
               style={{
                 columnFill: "balance",
               }}
