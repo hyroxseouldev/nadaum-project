@@ -10,29 +10,29 @@ export default async function ContactModal() {
     {
       position: "기획, 운영, 제빵",
       name: "김지은",
-      instagram: "@prissy__1995",
+      instagram: "prissy__1995",
     },
     {
       position: "기획, 운영, 브루잉, 로스팅",
       name: "최광현",
-      instagram: "@rhkdgus",
+      instagram: "rhkdgus",
     },
 
     {
       position: "기획, 운영, 로스팅",
       name: "하청비",
-      instagram: "@wannabi",
+      instagram: "wannabi",
     },
 
     {
       position: "기획, 디자인, 웹, 영상 제작",
       name: "신동욱",
-      instagram: "@uxshin",
+      instagram: "uxshin",
     },
     {
       position: "Special Thanks.",
       name: "박근하",
-      instagram: "@geunhapark",
+      instagram: "geunhapark",
     },
   ];
   return (

@@ -132,20 +132,13 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
           disabled={uploading}
         />
         {/* Image Upload Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>이미지 선택</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ImageUploader
-              maxFiles={10}
-              maxFileSize={10}
-              acceptedTypes={["image/jpeg", "image/png", "image/webp"]}
-              onImagesChange={setImages}
-              disabled={uploading}
-            />
-          </CardContent>
-        </Card>
+        <ImageUploader
+          maxFiles={10}
+          maxFileSize={10}
+          acceptedTypes={["image/jpeg", "image/png", "image/webp"]}
+          onImagesChange={setImages}
+          disabled={uploading}
+        />
 
         {/* Upload Actions */}
         <div className="flex gap-4">

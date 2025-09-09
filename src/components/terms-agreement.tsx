@@ -40,6 +40,7 @@ export function TermsAgreement({
               onCheckedChange={onAgreeChange}
               disabled={disabled}
               required={required}
+              className="border-black"
             />
             <div className="grid gap-1.5 leading-none">
               <Label
