@@ -106,6 +106,18 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
     setShowProgress(false);
     setUploading(false);
 
+    // Reset all component states to initial values
+    setImages([]);
+    setAgreed(false);
+    setError(null);
+    setUploadProgress({
+      stage: "uploading",
+      progress: 0,
+      completed: 0,
+      total: 0,
+      errors: [],
+    });
+
     // Navigate to main page and refresh after successful upload
     if (
       uploadProgress.stage === "completed" &&

@@ -46,10 +46,10 @@ export async function uploadImages(
     const imageFile = images[i];
     
     try {
-      // Update progress - processing stage
+      // Update progress - processing stage (start)
       onProgress({
         stage: 'processing',
-        progress: (i / total) * 50, // First 50% for processing
+        progress: (i / total) * 100,
         currentFile: imageFile.file.name,
         completed,
         total,
@@ -73,7 +73,7 @@ export async function uploadImages(
       // Update progress - uploading stage
       onProgress({
         stage: 'uploading',
-        progress: 50 + (i / total) * 40, // Next 40% for uploading
+        progress: (i / total) * 100 + (50 / total), // Mid-way through current file
         currentFile: imageFile.file.name,
         completed,
         total,
@@ -133,11 +133,11 @@ export async function uploadImages(
 
       completed++;
 
-      // Update progress
+      // Update progress - file completed
       onProgress({
         stage: 'uploading',
-        progress: 50 + ((i + 1) / total) * 40,
-        currentFile: imageFile.file.name,
+        progress: ((i + 1) / total) * 100,
+        currentFile: undefined,
         completed,
         total,
         errors: [...errors],

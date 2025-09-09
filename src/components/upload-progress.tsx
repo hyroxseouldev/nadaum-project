@@ -80,19 +80,28 @@ export function UploadProgress({
               <span>진행상황</span>
               <span>{completed}/{total}</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={Math.min(progress, 100)} className="h-2" />
             <p className="text-xs text-center text-muted-foreground">
-              {Math.round(progress)}% 완료
+              {Math.round(Math.min(progress, 100))}% 완료
+              {stage === 'processing' && ' (이미지 처리 중)'}
+              {stage === 'uploading' && ' (업로드 중)'}
             </p>
           </div>
 
           {/* Current file */}
           {currentFile && stage !== 'completed' && (
             <div className="text-center p-3 bg-muted rounded-lg">
-              <p className="text-sm font-medium">현재 업로드 중</p>
+              <p className="text-sm font-medium">
+                {stage === 'processing' ? '현재 처리 중' : '현재 업로드 중'}
+              </p>
               <p className="text-xs text-muted-foreground truncate" title={currentFile}>
                 {currentFile}
               </p>
+              {total > 1 && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  ({completed + 1} / {total})
+                </p>
+              )}
             </div>
           )}
 
