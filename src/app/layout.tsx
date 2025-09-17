@@ -16,8 +16,8 @@ const notoSansMono = Noto_Sans_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Guest Photo Platform - 카페별 게스트 포토 공유",
-  description: "카페별 게스트 포토를 공유하고 관리할 수 있는 웹 플랫폼",
+  title: "나다움 프로젝트",
+  description: "나다움, 우리안의 이야기",
 };
 
 export default function RootLayout({
