@@ -96,9 +96,9 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
 
   // Skeleton grid component
   const SkeletonGrid = () => (
-    <div className="columns-2 lg:columns-4 gap-1 p-1">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 p-1" style={{ gridAutoRows: 'max-content' }}>
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="break-inside-avoid mb-1">
+        <div key={i}>
           <Skeleton
             className="w-full"
             style={{
@@ -110,13 +110,13 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
     </div>
   );
 
-  // Custom Masonry grid component
-  const MasonryGrid = () => (
-    <div className="columns-2 lg:columns-4 gap-1 p-1">
+  // Custom masonry-like grid component
+  const PhotoGrid = () => (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 p-1" style={{ gridAutoRows: 'max-content' }}>
       {photos.map((photo) => (
         <div
           key={photo.id}
-          className="break-inside-avoid mb-1 overflow-hidden group"
+          className="overflow-hidden group"
         >
           <Image
             src={photo.imageUrl}
@@ -168,15 +168,15 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
 
   return (
     <div>
-      <MasonryGrid />
+      <PhotoGrid />
 
       {/* Loading more indicator */}
       {hasMore && (
         <div ref={ref} className="py-8">
           {loadingMore && (
-            <div className="columns-2 lg:columns-4 gap-1 p-1">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 p-1" style={{ gridAutoRows: 'max-content' }}>
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="break-inside-avoid mb-1">
+                <div key={i}>
                   <Skeleton
                     className="w-full"
                     style={{
