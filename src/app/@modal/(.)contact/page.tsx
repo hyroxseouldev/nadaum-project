@@ -4,36 +4,36 @@ import ModalPageLayout from "@/components/modal-page-layout";
 import { getCafes, getParticipants } from "@/lib/actions";
 
 // 배포환경 모달 라우팅 문제 해결을 위한 dynamic export
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function ContactModal() {
   const cafes = await getCafes();
   const serverParticipants = await getParticipants();
   const participants = [
     {
-      position: "기획, 운영, 제빵",
+      position: "베이커",
       name: "김지은",
       instagram: "prissy__1995",
     },
     {
-      position: "기획, 운영, 브루잉, 로스팅",
+      position: "바리스타",
       name: "최광현",
       instagram: "rhkdgus",
     },
 
     {
-      position: "기획, 운영, 로스팅",
+      position: "바리스타",
       name: "하청비",
-      instagram: "wannabi",
+      instagram: "___wanna.bi_",
     },
 
     {
-      position: "기획, 디자인, 웹, 영상 제작",
+      position: "디자이너",
       name: "신동욱",
       instagram: "uxshin",
     },
     {
-      position: "Special Thanks.",
+      position: "음악.",
       name: "박근하",
       instagram: "geunhapark",
     },
