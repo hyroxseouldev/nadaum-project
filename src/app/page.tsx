@@ -18,14 +18,14 @@ export default async function Home({ searchParams }: HomeProps) {
     <MainLayout>
       {/* Sticky navigation header */}
       <div className="sticky top-0 bg-white z-10">
-        <ul className="flex gap-4.5 px-2 pt-3 overflow-x-auto">
+        <ul className="flex gap-4.5 px-2 pt-3 pb-1 overflow-x-auto">
           <li className="text-sm font-normal text-[#000000] whitespace-nowrap">
             <Link href={`/`}>ALL</Link>
           </li>
           {noneHiddenCafe.map((cafe) => (
             <li
               key={cafe.id}
-              className={`text-sm font-normal text-[#000000] whitespace-nowrap ${
+              className={`text-sm font-normal text-[#2a1f1f] whitespace-nowrap ${
                 cafeId === cafe.id
                   ? "border-b-[1px] border-solid border-black"
                   : ""
