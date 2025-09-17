@@ -1,4 +1,3 @@
-import { GuestPhotoFeed } from "@/components/guest-photo-feed";
 import MainLayout from "@/components/main-layout";
 import { PlockPhotoFeed } from "@/components/plock-photo-feed";
 import { getCafes } from "@/lib/actions";

@@ -1,15 +1,14 @@
 "use client";
 import React from "react";
-import { useState, useEffect, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ImageUploader } from "@/components/image-uploader";
 import { UploadProgress } from "@/components/upload-progress";
 import { TermsAgreement } from "@/components/terms-agreement";
-import { getCafes } from "@/lib/actions";
-import { uploadImages, ensureStorageBucket } from "@/lib/upload-utils";
+import { uploadImages } from "@/lib/upload-utils";
 import { Camera, ArrowLeft, Upload, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
