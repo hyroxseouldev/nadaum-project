@@ -105,7 +105,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="break-inside-avoid mb-1">
             <Skeleton
-              className="w-full rounded-md"
+              className="w-full"
               style={{
                 height: `${200 + (i % 3) * 100}px`, // Varying heights for masonry effect
               }}
@@ -161,7 +161,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
               alt={`Guest photo at ${photo.cafe?.name || "Unknown cafe"}`}
               width={400}
               height={600}
-              className="w-full h-auto object-cover rounded-md group-hover:opacity-90 transition-opacity duration-200"
+              className="w-full h-auto object-cover group-hover:opacity-90 transition-opacity duration-200"
               sizes="50vw"
               loading="lazy"
               style={{
@@ -185,7 +185,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="break-inside-avoid mb-1">
                   <Skeleton
-                    className="w-full rounded-md"
+                    className="w-full"
                     style={{
                       height: `${200 + (i % 3) * 100}px`, // Varying heights for masonry effect
                     }}

@@ -12,6 +12,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const cafes = await getCafes();
   const cafeId =
     cafes.find((cafe) => cafe.value === Number(cafeValue))?.id || undefined;
+
   return (
     <MainLayout>
       {/* Sticky navigation header */}
@@ -23,7 +24,11 @@ export default async function Home({ searchParams }: HomeProps) {
           {cafes.map((cafe) => (
             <li
               key={cafe.id}
-              className="text-sm font-normal text-[#000000] whitespace-nowrap"
+              className={`text-sm font-normal text-[#000000] whitespace-nowrap ${
+                cafeId === cafe.id
+                  ? "border-b-[1px] border-solid border-black"
+                  : ""
+              }`}
             >
               <Link href={`/?cafeValue=${cafe.value}`}>{cafe.name}</Link>
             </li>

@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+
 interface ParticipantCardProps {
   position: string;
   name: string;
@@ -14,10 +15,10 @@ const ParticipantCard = ({
   return (
     <div className="flex flex-col items-center justify-between">
       <p className="text-[10px] font-normal text-[#000000]">{position}</p>
-      <div className="flex items-center justify-between gap-1">
+      <div className="flex items-center flex-wrap gap-1 justify-center">
         <p className="text-[10px] font-normal text-[#000000]">{name}</p>
         <Link href={`https://instagram.com/${instagram}`} target="_blank">
-          <p className="text-[10px] font-normal text-[#000000] hover:underline">
+          <p className="text-[10px] font-normal text-[#000000] hover:underline leading-1">
             @{instagram}
           </p>
         </Link>
