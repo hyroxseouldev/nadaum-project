@@ -24,10 +24,10 @@ export function TermsAgreement({
     <div className="space-y-4">
       <div className="p-4">
         <div className="flex flex-col gap-y-2 mb-4">
-          <p className="text-[10px] font-normal text-[#000000] text-center whitespace-pre-line">
+          <p className="text-[7px] font-normal text-[#000000] text-center whitespace-pre-line">
             {term1}
           </p>
-          <p className="text-[10px] font-normal text-[#000000] text-center whitespace-pre-line">
+          <p className="text-[7px] font-normal text-[#000000] text-center whitespace-pre-line">
             {term2}
           </p>
         </div>
@@ -45,7 +45,7 @@ export function TermsAgreement({
             <div className="grid gap-1.5 leading-none">
               <Label
                 htmlFor="terms-agreement"
-                className="text-[10px] font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-[7px] font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 위 약관에 동의합니다
               </Label>
@@ -53,7 +53,7 @@ export function TermsAgreement({
           </div>
         </div>
         {!agreed && required && (
-          <p className="text-[10px] font-normal text-red-500 flex items-center justify-center text-center mt-3">
+          <p className="text-[7px] font-normal text-red-500 flex items-center justify-center text-center mt-3">
             업로드하려면 약관에 동의해주세요.
           </p>
         )}
