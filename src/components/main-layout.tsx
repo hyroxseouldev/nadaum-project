@@ -3,10 +3,10 @@ import MainFloatingActionButton from "@/components/main-floating-action-button";
 // 가로 최대값이 최대 400px 이고 그 이상이 되면 가운데 정렬이 되도록 하는 레이아웃 컴포넌트
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="max-w-[500px] mx-auto h-screen flex flex-col relative">
+    <div className="max-w-[1162px] mx-auto h-screen flex flex-col relative">
       {children}
       {/* Floating action buttons fixed to viewport */}
-      <div className="fixed bottom-7.5 right-1/2 transform translate-x-1/2 max-w-[500px] w-full">
+      <div className="fixed bottom-7.5 right-1/2 transform translate-x-1/2 max-w-[1162px] w-full">
         <div className="flex gap-1 justify-end pr-7">
           <MainFloatingActionButton
             href="/contact"

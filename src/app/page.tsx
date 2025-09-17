@@ -17,7 +17,7 @@ export default async function Home({ searchParams }: HomeProps) {
     <MainLayout>
       {/* Sticky navigation header */}
       <div className="sticky top-0 bg-white z-10">
-        <ul className="flex gap-4.5 px-2 py-3 overflow-x-auto">
+        <ul className="flex gap-4.5 px-2 pt-3 overflow-x-auto">
           <li className="text-sm font-normal text-[#000000] whitespace-nowrap">
             <Link href={`/`}>ALL</Link>
           </li>

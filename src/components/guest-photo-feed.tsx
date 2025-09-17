@@ -97,7 +97,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
   if (loading) {
     return (
       <div
-        className="columns-2 gap-1 p-2 sm:p-1"
+        className="columns-2 lg:columns-4 gap-1 p-2 sm:p-1"
         style={{
           columnFill: "balance",
         }}
@@ -146,7 +146,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
   return (
     <div>
       <div
-        className="columns-2 gap-1 mb-8 p-2 sm:p-1"
+        className="columns-2 lg:columns-4 gap-1 mb-8 p-2 sm:p-1"
         style={{
           columnFill: "balance",
         }}
@@ -177,7 +177,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
         <div ref={ref} className="py-8">
           {loadingMore && (
             <div
-              className="columns-2 gap-1 w-full p-2 sm:p-1"
+              className="columns-2 lg:columns-4 gap-1 w-full p-2 sm:p-1"
               style={{
                 columnFill: "balance",
               }}
