@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { cafe, guestphoto, participant } from "@/lib/db/schema";
 import { eq, desc, asc, and } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import type { Cafe, Guestphoto, Participant } from "@/lib/db/schema";
 
 // Guest Photo Actions
@@ -84,6 +84,9 @@ export async function createGuestPhoto(
 
     revalidatePath("/");
     revalidatePath("/admin");
+
+    // 캐시 무효화 추가
+    revalidateTag("guest-photos");
 
     return newPhoto;
   } catch (error) {

@@ -149,8 +149,12 @@ export function UploadProgress({
           {/* Close button */}
           {(stage === 'completed' || stage === 'error') && (
             <div className="flex justify-end">
-              <Button onClick={onClose} variant={stage === 'completed' ? 'default' : 'outline'}>
-                {stage === 'completed' ? '확인' : '닫기'}
+              <Button
+                onClick={onClose}
+                variant={stage === 'completed' ? 'default' : 'outline'}
+                className={stage === 'completed' ? 'bg-green-600 hover:bg-green-700' : ''}
+              >
+                {stage === 'completed' ? '확인하고 메인으로 이동' : '닫기'}
               </Button>
             </div>
           )}

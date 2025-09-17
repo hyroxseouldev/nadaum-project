@@ -78,15 +78,8 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
       if (result.success) {
         toast.success(`${result.uploadedCount}개의 이미지가 업로드되었습니다!`);
 
-        // Clear form after successful upload and navigate to main page with refresh
-        setTimeout(() => {
-          setImages([]);
-          setAgreed(false);
-          setShowProgress(false);
-          setUploading(false);
-          router.push("/");
-          router.refresh(); // Refresh the main page to show updated content
-        }, 2000);
+        // UploadProgress 컴포넌트에서 "확인" 버튼으로 모달을 닫도록 처리
+        // 자동 닫기는 제거하고 사용자가 확인 버튼을 눌러서 닫도록 변경
       } else {
         toast.error("업로드에 실패했습니다.");
         setError("업로드 중 오류가 발생했습니다.");
@@ -102,7 +95,7 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
     }
   };
 
-  const handleProgressClose = () => {
+  const handleProgressClose = async () => {
     setShowProgress(false);
     setUploading(false);
 
@@ -123,8 +116,20 @@ const UploadFormModal = ({ selectedCafe }: UploadFormModalProps) => {
       uploadProgress.stage === "completed" &&
       uploadProgress.errors.length === 0
     ) {
+      try {
+        // 캐시 무효화를 통해 최신 데이터 로드
+        await fetch("/api/revalidate-photos", { method: "POST" });
+      } catch (error) {
+        console.error("Failed to revalidate cache:", error);
+      }
+
+      // 모든 모달을 닫고 메인 페이지로 이동
       router.push("/");
-      router.refresh(); // Refresh the main page to show updated content
+
+      // 페이지 새로고침으로 최신 데이터 확실히 로드
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 200);
     }
   };
 
