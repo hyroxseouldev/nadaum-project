@@ -10,14 +10,6 @@ export default function MediaModal() {
       title: "캠페인 영상",
       link: "https://www.instagram.com/reel/DOn5mZyEnvy/?utm_source=ig_web_copy_link",
     },
-    {
-      title: "배너 영상",
-      link: "https://www.google.com",
-    },
-    {
-      title: "인스타그램",
-      link: "https://www.google.com",
-    },
   ];
   return (
     <Modal>
