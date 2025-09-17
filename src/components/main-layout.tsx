@@ -21,6 +21,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             imageWidth={24}
             imageHeight={24}
           />
+          {/* 서울 401 */}
+          {/* 정보는 카페 관리로 가서 밸류 값을 보고 바꿔주면 됨 */}
           <MainFloatingActionButton
             href="/upload?uploadValue=401"
             imageSrc="/logo/plus.png"
