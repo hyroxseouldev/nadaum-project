@@ -180,7 +180,8 @@ export async function getCafes(): Promise<Cafe[]> {
 export async function createCafe(
   name: string,
   address: string,
-  value?: number
+  value?: number,
+  isHidden?: boolean
 ) {
   try {
     const [newCafe] = await db
@@ -189,6 +190,7 @@ export async function createCafe(
         name,
         address,
         value,
+        isHidden: isHidden ?? false,
       })
       .returning();
 
@@ -205,7 +207,8 @@ export async function updateCafe(
   id: string,
   name: string,
   address: string,
-  value?: number
+  value?: number,
+  isHidden?: boolean
 ) {
   try {
     const [updatedCafe] = await db
@@ -214,6 +217,7 @@ export async function updateCafe(
         name,
         address,
         value,
+        isHidden,
         updatedAt: new Date(),
       })
       .where(eq(cafe.id, id))
@@ -225,6 +229,26 @@ export async function updateCafe(
   } catch (error) {
     console.error("Error updating cafe:", error);
     throw new Error("카페 수정 중 오류가 발생했습니다.");
+  }
+}
+
+export async function toggleCafeVisibility(id: string, isHidden: boolean) {
+  try {
+    const [updatedCafe] = await db
+      .update(cafe)
+      .set({
+        isHidden,
+        updatedAt: new Date(),
+      })
+      .where(eq(cafe.id, id))
+      .returning();
+
+    revalidatePath("/admin");
+
+    return updatedCafe;
+  } catch (error) {
+    console.error("Error toggling cafe visibility:", error);
+    throw new Error("카페 표시 상태 변경 중 오류가 발생했습니다.");
   }
 }
 

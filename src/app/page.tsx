@@ -10,6 +10,7 @@ interface HomeProps {
 export default async function Home({ searchParams }: HomeProps) {
   const { cafeValue } = await searchParams;
   const cafes = await getCafes();
+  const noneHiddenCafe = cafes.filter((c) => c.isHidden === false);
   const cafeId =
     cafes.find((cafe) => cafe.value === Number(cafeValue))?.id || undefined;
 
@@ -21,7 +22,7 @@ export default async function Home({ searchParams }: HomeProps) {
           <li className="text-sm font-normal text-[#000000] whitespace-nowrap">
             <Link href={`/`}>ALL</Link>
           </li>
-          {cafes.map((cafe) => (
+          {noneHiddenCafe.map((cafe) => (
             <li
               key={cafe.id}
               className={`text-sm font-normal text-[#000000] whitespace-nowrap ${

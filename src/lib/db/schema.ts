@@ -17,6 +17,7 @@ export const cafe = pgTable("cafe", {
   name: varchar("name", { length: 255 }).notNull(),
   address: text("address").notNull(),
   value: integer("value"), // 가격대나 평점 등의 값
+  isHidden: boolean("is_hidden").default(false).notNull(), // 숨김 기능
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

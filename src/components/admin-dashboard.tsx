@@ -43,6 +43,7 @@ import {
   getCafes,
   createCafe,
   updateCafe,
+  toggleCafeVisibility,
   getParticipants,
   createParticipant,
   updateParticipant,
@@ -61,6 +62,8 @@ import {
   Filter,
   X,
   Edit,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -83,6 +86,7 @@ interface Cafe {
   name: string;
   address: string;
   value: number | null;
+  isHidden: boolean;
 }
 
 interface Participant {
@@ -109,9 +113,17 @@ export function AdminDashboard() {
   const [filterStatus, setFilterStatus] = useState<
     "all" | "pending" | "approved"
   >("all");
+  const [cafeFilter, setCafeFilter] = useState<
+    "all" | "visible" | "hidden"
+  >("all");
 
   // Form states
-  const [newCafe, setNewCafe] = useState({ name: "", address: "", value: "" });
+  const [newCafe, setNewCafe] = useState({
+    name: "",
+    address: "",
+    value: "",
+    isHidden: false
+  });
   const [newParticipant, setNewParticipant] = useState({
     name: "",
     instagram: "",
@@ -127,6 +139,7 @@ export function AdminDashboard() {
     name: string;
     address: string;
     value: number | null;
+    isHidden: boolean;
   } | null>(null);
   const [editingParticipant, setEditingParticipant] = useState<{
     id: string;
@@ -136,6 +149,7 @@ export function AdminDashboard() {
     position: string;
   } | null>(null);
   const [updatingPhotos, setUpdatingPhotos] = useState<Set<string>>(new Set());
+  const [updatingCafes, setUpdatingCafes] = useState<Set<string>>(new Set());
 
   // Load data
   const loadData = async () => {
@@ -211,9 +225,14 @@ export function AdminDashboard() {
   const handleCreateCafe = async () => {
     try {
       const value = newCafe.value ? parseInt(newCafe.value) : undefined;
-      const cafe = await createCafe(newCafe.name, newCafe.address, value);
+      const cafe = await createCafe(
+        newCafe.name,
+        newCafe.address,
+        value,
+        newCafe.isHidden
+      );
       setCafes([...cafes, cafe]);
-      setNewCafe({ name: "", address: "", value: "" });
+      setNewCafe({ name: "", address: "", value: "", isHidden: false });
       setShowCafeDialog(false);
       toast.success("새 카페가 추가되었습니다.");
     } catch (error) {
@@ -243,10 +262,11 @@ export function AdminDashboard() {
     id: string,
     name: string,
     address: string,
-    value: number | null
+    value: number | null,
+    isHidden: boolean
   ) => {
     try {
-      await updateCafe(id, name, address, value || undefined);
+      await updateCafe(id, name, address, value || undefined, isHidden);
       loadData();
       setEditingCafe(null);
       toast.success("카페 정보가 수정되었습니다.");
@@ -294,12 +314,45 @@ export function AdminDashboard() {
     }
   };
 
+  const handleToggleCafeVisibility = async (
+    id: string,
+    currentHidden: boolean
+  ) => {
+    try {
+      setUpdatingCafes((prev) => new Set(prev).add(id));
+      await toggleCafeVisibility(id, !currentHidden);
+      loadData();
+      toast.success(
+        `카페가 ${!currentHidden ? "숨김" : "표시"} 상태로 변경되었습니다.`
+      );
+    } catch (error) {
+      toast.error("카페 표시 상태 변경 중 오류가 발생했습니다.");
+    } finally {
+      setUpdatingCafes((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
+  };
+
   const filteredPhotos = photos.filter((photo) => {
     switch (filterStatus) {
       case "pending":
         return !photo.adminApproval;
       case "approved":
         return photo.adminApproval;
+      default:
+        return true;
+    }
+  });
+
+  const filteredCafes = cafes.filter((cafe) => {
+    switch (cafeFilter) {
+      case "visible":
+        return !cafe.isHidden;
+      case "hidden":
+        return cafe.isHidden;
       default:
         return true;
     }
@@ -615,7 +668,25 @@ export function AdminDashboard() {
         {/* Cafes Tab */}
         <TabsContent value="cafes" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">카페 관리</h3>
+            <div className="flex items-center space-x-4">
+              <h3 className="text-lg font-semibold">카페 관리</h3>
+              <Select
+                value={cafeFilter}
+                onValueChange={(value: "all" | "visible" | "hidden") =>
+                  setCafeFilter(value)
+                }
+              >
+                <SelectTrigger className="w-32">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체</SelectItem>
+                  <SelectItem value="visible">표시됨</SelectItem>
+                  <SelectItem value="hidden">숨김</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Dialog open={showCafeDialog} onOpenChange={setShowCafeDialog}>
               <DialogTrigger asChild>
                 <Button>
@@ -661,6 +732,16 @@ export function AdminDashboard() {
                       placeholder="가격대를 입력하세요 (선택사항)"
                     />
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="cafe-hidden"
+                      checked={newCafe.isHidden}
+                      onCheckedChange={(checked) =>
+                        setNewCafe({ ...newCafe, isHidden: !!checked })
+                      }
+                    />
+                    <Label htmlFor="cafe-hidden">카페 숨김 (체크하면 목록에서 숨겨집니다)</Label>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button
@@ -681,7 +762,7 @@ export function AdminDashboard() {
           </div>
 
           <div className="grid gap-4">
-            {cafes.map((cafe) => (
+            {filteredCafes.map((cafe) => (
               <Card key={cafe.id}>
                 <CardContent className="p-4">
                   {editingCafe?.id === cafe.id ? (
@@ -736,6 +817,21 @@ export function AdminDashboard() {
                           placeholder="원"
                         />
                       </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`edit-cafe-hidden-${cafe.id}`}
+                          checked={editingCafe.isHidden}
+                          onCheckedChange={(checked) =>
+                            setEditingCafe({
+                              ...editingCafe,
+                              isHidden: !!checked,
+                            })
+                          }
+                        />
+                        <Label htmlFor={`edit-cafe-hidden-${cafe.id}`}>
+                          카페 숨김
+                        </Label>
+                      </div>
                       <div className="flex space-x-2">
                         <Button
                           size="sm"
@@ -744,7 +840,8 @@ export function AdminDashboard() {
                               editingCafe.id,
                               editingCafe.name,
                               editingCafe.address,
-                              editingCafe.value
+                              editingCafe.value,
+                              editingCafe.isHidden
                             )
                           }
                           disabled={!editingCafe.name || !editingCafe.address}
@@ -763,8 +860,13 @@ export function AdminDashboard() {
                   ) : (
                     // View mode
                     <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <h4 className="font-semibold">{cafe.name}</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-semibold">{cafe.name}</h4>
+                          <Badge variant={cafe.isHidden ? "destructive" : "default"}>
+                            {cafe.isHidden ? "숨김" : "표시"}
+                          </Badge>
+                        </div>
                         <p className="text-sm text-muted-foreground flex items-center">
                           <MapPin className="h-3 w-3 mr-1" />
                           {cafe.address}
@@ -775,27 +877,67 @@ export function AdminDashboard() {
                           </Badge>
                         )}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          setEditingCafe({
-                            id: cafe.id,
-                            name: cafe.name,
-                            address: cafe.address,
-                            value: cafe.value,
-                          })
-                        }
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        편집
-                      </Button>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant={cafe.isHidden ? "default" : "secondary"}
+                          onClick={() =>
+                            handleToggleCafeVisibility(cafe.id, cafe.isHidden)
+                          }
+                          disabled={updatingCafes.has(cafe.id)}
+                        >
+                          {updatingCafes.has(cafe.id) ? (
+                            <>...</>
+                          ) : cafe.isHidden ? (
+                            <>
+                              <Eye className="h-3 w-3 mr-1" />
+                              표시
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="h-3 w-3 mr-1" />
+                              숨김
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            setEditingCafe({
+                              id: cafe.id,
+                              name: cafe.name,
+                              address: cafe.address,
+                              value: cafe.value,
+                              isHidden: cafe.isHidden,
+                            })
+                          }
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          편집
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </CardContent>
               </Card>
             ))}
           </div>
+
+          {filteredCafes.length === 0 && (
+            <Card>
+              <CardContent className="text-center py-12">
+                <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">
+                  {cafeFilter === "all"
+                    ? "등록된 카페가 없습니다."
+                    : cafeFilter === "visible"
+                    ? "표시된 카페가 없습니다."
+                    : "숨겨진 카페가 없습니다."}
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Participants Tab */}
