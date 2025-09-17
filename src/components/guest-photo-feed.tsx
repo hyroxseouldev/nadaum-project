@@ -2,21 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getGuestPhotos } from "@/lib/actions";
 import { useIntersection } from "@/hooks/use-intersection";
-
-// Dynamically import Masonry components to avoid SSR issues
-const ResponsiveMasonry = dynamic(
-  () => import("react-responsive-masonry").then((mod) => mod.ResponsiveMasonry),
-  { ssr: false }
-);
-
-const Masonry = dynamic(
-  () => import("react-responsive-masonry").then((mod) => mod.default),
-  { ssr: false }
-);
 
 interface GuestPhoto {
   id: string;
@@ -42,11 +30,6 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const loadPhotos = useCallback(
     async (pageNum: number, cafeId?: string, reset = false) => {
@@ -111,18 +94,13 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
     loadPhotos,
   ]);
 
-  // Fallback skeleton component for SSR
+  // Skeleton grid component
   const SkeletonGrid = () => (
-    <div
-      className="columns-2 lg:columns-4 gap-0.5 p-1"
-      style={{
-        columnFill: "balance",
-      }}
-    >
+    <div className="columns-2 lg:columns-4 gap-1 p-1">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="break-inside-avoid mb-0.5">
+        <div key={i} className="break-inside-avoid mb-1">
           <Skeleton
-            className="w-full"
+            className="w-full rounded-sm"
             style={{
               height: `${200 + (i % 3) * 100}px`,
             }}
@@ -132,29 +110,33 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
     </div>
   );
 
-  if (loading) {
-    return isMounted ? (
-      <div className="p-1">
-        <ResponsiveMasonry
-          columnsCountBreakPoints={{ 350: 2, 1024: 4 }}
+  // Custom Masonry grid component
+  const MasonryGrid = () => (
+    <div className="columns-2 lg:columns-4 gap-1 p-1">
+      {photos.map((photo) => (
+        <div
+          key={photo.id}
+          className="break-inside-avoid mb-1 overflow-hidden group"
         >
-          <Masonry gutter="2px">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i}>
-                <Skeleton
-                  className="w-full"
-                  style={{
-                    height: `${200 + (i % 3) * 100}px`,
-                  }}
-                />
-              </div>
-            ))}
-          </Masonry>
-        </ResponsiveMasonry>
-      </div>
-    ) : (
-      <SkeletonGrid />
-    );
+          <Image
+            src={photo.imageUrl}
+            alt={`Guest photo at ${photo.cafe?.name || "Unknown cafe"}`}
+            width={400}
+            height={600}
+            className="w-full h-auto object-cover group-hover:opacity-90 transition-opacity duration-200 rounded-sm"
+            sizes="(max-width: 1024px) 50vw, 25vw"
+            loading="lazy"
+            style={{
+              aspectRatio: "auto",
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+
+  if (loading) {
+    return <SkeletonGrid />;
   }
 
   if (error) {
@@ -184,123 +166,29 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
     );
   }
 
-  // Fallback photo grid for SSR
-  const PhotoGrid = () => (
-    <div
-      className="columns-2 lg:columns-4 gap-0.5 mb-8 p-1"
-      style={{
-        columnFill: "balance",
-      }}
-    >
-      {photos.map((photo) => (
-        <div
-          key={photo.id}
-          className="break-inside-avoid mb-0.5 overflow-hidden group"
-        >
-          <Image
-            src={photo.imageUrl}
-            alt={`Guest photo at ${photo.cafe?.name || "Unknown cafe"}`}
-            width={400}
-            height={600}
-            className="w-full h-auto object-cover group-hover:opacity-90 transition-opacity duration-200"
-            sizes="50vw"
-            loading="lazy"
-            style={{
-              aspectRatio: "auto",
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <div>
-      {isMounted ? (
-        <div className="mb-8 p-1">
-          <ResponsiveMasonry
-            columnsCountBreakPoints={{ 350: 2, 1024: 4 }}
-          >
-            <Masonry gutter="2px">
-              {photos.map((photo) => (
-                <div
-                  key={photo.id}
-                  className="overflow-hidden group"
-                >
-                  <Image
-                    src={photo.imageUrl}
-                    alt={`Guest photo at ${photo.cafe?.name || "Unknown cafe"}`}
-                    width={400}
-                    height={600}
-                    className="w-full h-auto object-cover group-hover:opacity-90 transition-opacity duration-200"
-                    sizes="50vw"
-                    loading="lazy"
-                    style={{
-                      aspectRatio: "auto",
-                    }}
-                  />
-                </div>
-              ))}
-            </Masonry>
-          </ResponsiveMasonry>
-        </div>
-      ) : (
-        <PhotoGrid />
-      )}
+      <MasonryGrid />
 
       {/* Loading more indicator */}
       {hasMore && (
         <div ref={ref} className="py-8">
           {loadingMore && (
-            isMounted ? (
-              <div className="p-1">
-                <ResponsiveMasonry
-                  columnsCountBreakPoints={{ 350: 2, 1024: 4 }}
-                >
-                  <Masonry gutter="2px">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i}>
-                        <Skeleton
-                          className="w-full"
-                          style={{
-                            height: `${200 + (i % 3) * 100}px`,
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </Masonry>
-                </ResponsiveMasonry>
-              </div>
-            ) : (
-              <div
-                className="columns-2 lg:columns-4 gap-0.5 p-1"
-                style={{
-                  columnFill: "balance",
-                }}
-              >
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="break-inside-avoid mb-0.5">
-                    <Skeleton
-                      className="w-full"
-                      style={{
-                        height: `${200 + (i % 3) * 100}px`,
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            )
+            <div className="columns-2 lg:columns-4 gap-1 p-1">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="break-inside-avoid mb-1">
+                  <Skeleton
+                    className="w-full rounded-sm"
+                    style={{
+                      height: `${200 + (i % 3) * 100}px`,
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
-
-      {/* {!hasMore && photos.length > 0 && (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">
-            모든 게스트 포토를 확인했습니다.
-          </p>
-        </div>
-      )} */}
     </div>
   );
 }
