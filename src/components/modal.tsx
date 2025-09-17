@@ -14,7 +14,7 @@ export default function Modal({ children }: { children: React.ReactNode }) {
       if (window.history.length > 1) {
         router.back();
       } else {
-        router.push('/');
+        router.push("/");
       }
     }
     setOpen(open);
@@ -24,7 +24,7 @@ export default function Modal({ children }: { children: React.ReactNode }) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTitle className="sr-only">Modal</DialogTitle>
       <DialogContent
-        className="max-h-[90vh] w-[calc(100vw-2rem)] max-w-[460px] p-0 overflow-hidden rounded-lg sm:w-full sm:max-w-[460px]"
+        className="max-h-[90vh] w-[calc(100vw-2rem)] max-w-[460px] p-0 overflow-hidden sm:w-full sm:max-w-[460px] rounded-none"
         showCloseButton={true}
       >
         <div className="overflow-y-auto max-h-[90vh]">{children}</div>
