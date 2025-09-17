@@ -100,7 +100,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="break-inside-avoid mb-1">
           <Skeleton
-            className="w-full rounded-sm"
+            className="w-full"
             style={{
               height: `${200 + (i % 3) * 100}px`,
             }}
@@ -123,7 +123,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
             alt={`Guest photo at ${photo.cafe?.name || "Unknown cafe"}`}
             width={400}
             height={600}
-            className="w-full h-auto object-cover group-hover:opacity-90 transition-opacity duration-200 rounded-sm"
+            className="w-full h-auto object-cover group-hover:opacity-90 transition-opacity duration-200"
             sizes="(max-width: 1024px) 50vw, 25vw"
             loading="lazy"
             style={{
@@ -145,7 +145,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
         <p className="text-red-500 mb-4">{error}</p>
         <button
           onClick={() => loadPhotos(0, selectedCafeId, true)}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
         >
           다시 시도
         </button>
@@ -178,7 +178,7 @@ export function GuestPhotoFeed({ selectedCafeId }: GuestPhotoFeedProps) {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="break-inside-avoid mb-1">
                   <Skeleton
-                    className="w-full rounded-sm"
+                    className="w-full"
                     style={{
                       height: `${200 + (i % 3) * 100}px`,
                     }}
