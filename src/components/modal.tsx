@@ -1,23 +1,31 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export default function Modal({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+
+  // 모달 즉시 표시를 위한 최적화
+  useEffect(() => {
+    setOpen(true);
+  }, []);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      // 배포환경에서 router.back() 문제 해결
-      if (window.history.length > 1) {
-        router.back();
-      } else {
-        router.push("/");
-      }
+      setOpen(false);
+      // 애니메이션 완료 후 네비게이션
+      setTimeout(() => {
+        // 배포환경에서 router.back() 문제 해결
+        if (window.history.length > 1) {
+          router.back();
+        } else {
+          router.push("/");
+        }
+      }, 150);
     }
-    setOpen(open);
   };
 
   return (

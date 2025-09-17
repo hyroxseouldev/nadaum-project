@@ -1,7 +1,7 @@
 import { AnimationPhotoFeed } from "@/components/animation-photo-feed";
 import MainLayout from "@/components/main-layout";
 import { PlockPhotoFeed } from "@/components/plock-photo-feed";
-import { getCafes } from "@/lib/actions";
+import { getCachedCafes } from "@/lib/cache";
 import Link from "next/link";
 
 // searchParams 타입 정의
@@ -10,7 +10,7 @@ interface HomeProps {
 }
 export default async function Home({ searchParams }: HomeProps) {
   const { cafeValue } = await searchParams;
-  const cafes = await getCafes();
+  const cafes = await getCachedCafes();
   const noneHiddenCafe = cafes.filter((c) => c.isHidden === false);
   const cafeId =
     cafes.find((cafe) => cafe.value === Number(cafeValue))?.id || undefined;
