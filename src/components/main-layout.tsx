@@ -7,7 +7,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       {children}
       {/* Floating action buttons fixed to viewport */}
       <div className="fixed bottom-7.5 right-1/2 transform translate-x-1/2 max-w-[1162px] w-full">
-        <div className="flex gap-1 justify-end pr-7">
+        <div className="flex gap-1 justify-end pr-5">
           <MainFloatingActionButton
             href="/contact"
             imageSrc="/logo/logo.png"
