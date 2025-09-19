@@ -1,15 +1,14 @@
-import { AnimationPhotoFeed } from "@/components/animation-photo-feed";
 import MainLayout from "@/components/main-layout";
-import { PlockPhotoFeed } from "@/components/plock-photo-feed";
 import { RealtimePhotoFeed } from "@/components/realtime-photo-feed";
 import { getCachedCafes } from "@/lib/cache";
 import Link from "next/link";
 
 // searchParams 타입 정의
-interface HomeProps {
+interface ViewsProps {
   searchParams: Promise<{ cafeValue: string }>;
 }
-export default async function Home({ searchParams }: HomeProps) {
+
+export default async function Views({ searchParams }: ViewsProps) {
   const { cafeValue } = await searchParams;
   const cafes = await getCachedCafes();
   const noneHiddenCafe = cafes.filter((c) => c.isHidden === false);
@@ -22,7 +21,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <div className="sticky top-0 bg-white z-10">
         <ul className="flex gap-4.5 px-2 pt-3 pb-1 overflow-x-auto">
           <li className="text-sm font-normal text-[#000000] whitespace-nowrap">
-            <Link href={`/`}>ALL</Link>
+            <Link href={`/views`}>ALL</Link>
           </li>
           {noneHiddenCafe.map((cafe) => (
             <li
@@ -33,7 +32,7 @@ export default async function Home({ searchParams }: HomeProps) {
                   : ""
               }`}
             >
-              <Link href={`/?cafeValue=${cafe.value}`}>{cafe.name}</Link>
+              <Link href={`/views?cafeValue=${cafe.value}`}>{cafe.name}</Link>
             </li>
           ))}
         </ul>
@@ -41,10 +40,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto pb-20">
-        {/* <GuestPhotoFeed selectedCafeId={cafeId} /> */}
-        <PlockPhotoFeed selectedCafeId={cafeId} />
-        {/* <AnimationPhotoFeed selectedCafeId={cafeId} /> */}
-        {/* <RealtimePhotoFeed selectedCafeId={cafeId} /> */}
+        <RealtimePhotoFeed selectedCafeId={cafeId} />
       </div>
     </MainLayout>
   );
