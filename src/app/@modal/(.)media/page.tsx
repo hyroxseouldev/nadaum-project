@@ -7,9 +7,17 @@ export const dynamic = "force-dynamic";
 export default function MediaModal() {
   const media = [
     {
-      title: "캠페인 영상",
+      title: "나다움 팀 미팅 영상",
       link: "https://www.instagram.com/reel/DOn5mZyEnvy/?utm_source=ig_web_copy_link",
     },
+    {
+      title: "베이커 김지은 베이킹 영상",
+      link: "https://www.instagram.com/reel/DOs4w8hkoNL/?utm_source=ig_web_copy_link&igsh=MWEzaDgzaWowNHFwdg==",
+    },    
+    {
+      title: "바리스타 하청비 최광현 로스팅 영상",
+      link: "https://www.instagram.com/reel/DOs6AKvktIm/?utm_source=ig_web_copy_link&igsh=MXZ6cTFkaGtiYW9xYQ==",
+    },    
   ];
   return (
     <Modal>
