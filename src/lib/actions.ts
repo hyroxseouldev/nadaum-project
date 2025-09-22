@@ -339,7 +339,7 @@ export async function updateParticipant(
 }
 
 // Admin-specific actions
-export async function getAllGuestPhotos(page = 0, limit = 20) {
+export async function getAllGuestPhotos(page = 0, limit = 400) {
   try {
     // Fetch one extra item to check if there are more pages
     const photos = await db
