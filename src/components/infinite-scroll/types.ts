@@ -18,6 +18,7 @@ export interface InfiniteScrollProps {
 export interface PhotoGridProps {
   photos: GuestPhoto[];
   controls: any; // motion controls
+  isScrolling?: boolean;
 }
 
 export interface SkeletonGridProps {

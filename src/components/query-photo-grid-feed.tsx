@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useAnimation } from "motion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useInView } from "react-intersection-observer";
 import { getGuestPhotos } from "@/lib/actions";
 import {
   PhotoGrid,
@@ -16,19 +15,12 @@ import {
   type InfiniteScrollProps,
 } from "@/components/infinite-scroll";
 
-export function QueryPhotoGridFeed({
-  selectedCafeId,
-}: InfiniteScrollProps) {
-  const [isScrolling, setIsScrolling] = useState(false);
-
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>(null);
+export function QueryPhotoGridFeed({ selectedCafeId }: InfiniteScrollProps) {
   const controls = useAnimation();
-
-  // Intersection observer for infinite scroll
-  const { ref, inView } = useInView({
-    threshold: 0.1,
-    rootMargin: "100px",
-  });
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // React Query infinite query for photos
   const {
@@ -43,35 +35,76 @@ export function QueryPhotoGridFeed({
   } = useInfiniteQuery({
     queryKey: ["guest-photos", selectedCafeId],
     queryFn: ({ pageParam = 0 }) => {
-      return getGuestPhotos(pageParam, selectedCafeId, 30);
+      return getGuestPhotos(pageParam, selectedCafeId, 20);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.hasMore ? lastPage.nextPage : undefined;
     },
     initialPageParam: 0,
-    refetchInterval: false, // Disable automatic refetch to prevent scroll jump
-    staleTime: 1000 * 60 * 5, // Increase stale time to 5 minutes
+    refetchInterval: 3 * 60 * 1000, // 3분마다 자동 refetch
+    staleTime: 3 * 60 * 1000, // 3분 (180,000ms),
     refetchOnWindowFocus: false, // Disable refetch on window focus to prevent scroll jump
     refetchOnMount: false, // Only refetch on mount if data is stale
+    notifyOnChangeProps: ["data", "error"], // Only notify on data/error changes
   });
 
   // Flatten all pages into a single array of photos
   const photos = data?.pages.flatMap((page) => page.data) ?? [];
 
-  // Scroll detection for animation control
+  // Handle loading more photos with intersection observer
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Set up intersection observer for infinite scroll
+  useEffect(() => {
+    const currentRef = loadMoreRef.current;
+    if (!currentRef) return;
+
+    // Disconnect previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    // Create new intersection observer
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          handleLoadMore();
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "100px",
+      }
+    );
+
+    // Start observing
+    observerRef.current.observe(currentRef);
+
+    // Cleanup
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [handleLoadMore]);
+
+  // Scroll detection for better UX
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolling(true);
 
-      // Clear existing timeout
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
 
-      // Set new timeout to detect when scrolling stops
       scrollTimeoutRef.current = setTimeout(() => {
         setIsScrolling(false);
-      }, 150); // 150ms after scrolling stops
+      }, 150);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -84,11 +117,9 @@ export function QueryPhotoGridFeed({
     };
   }, []);
 
-
   // Animation control
   useEffect(() => {
     if (!isScrolling && photos.length > 0) {
-      // Start floating animation when not scrolling
       controls.start({
         y: [0, -8, 0],
         transition: {
@@ -98,22 +129,10 @@ export function QueryPhotoGridFeed({
         },
       });
     } else {
-      // Stop animation when scrolling
       controls.stop();
       controls.set({ y: 0 });
     }
   }, [isScrolling, photos.length, controls]);
-
-
-  // Load more photos when reaching bottom
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-
-
 
   if (status === "pending") {
     return (
@@ -133,26 +152,29 @@ export function QueryPhotoGridFeed({
 
   return (
     <div>
+      {/* Photo Grid */}
       <div className="p-1">
         <PhotoGrid
           photos={photos}
           controls={controls}
+          isScrolling={isScrolling}
         />
       </div>
 
-      {/* Intersection observer trigger - always rendered for infinite scroll */}
-      <div ref={ref} className="h-4 w-full" />
-
-      {/* Loading more indicator */}
-      <LoadingIndicator isLoading={isFetchingNextPage} />
+      {/* Infinite scroll trigger */}
+      <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
+        {hasNextPage && isFetchingNextPage && (
+          <LoadingIndicator isLoading={true} />
+        )}
+      </div>
 
       {/* End of content indicator */}
-      {!hasNextPage && <EndOfContent totalPhotos={photos.length} />}
+      {!hasNextPage && photos.length > 0 && (
+        <EndOfContent totalPhotos={photos.length} />
+      )}
 
       {/* Background loading indicator */}
-      <BackgroundLoading
-        isVisible={isFetching && !isFetchingNextPage}
-      />
+      <BackgroundLoading isVisible={isFetching && !isFetchingNextPage} />
     </div>
   );
 }
