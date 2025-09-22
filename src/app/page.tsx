@@ -1,7 +1,5 @@
-import { AnimationPhotoFeed } from "@/components/animation-photo-feed";
 import MainLayout from "@/components/main-layout";
 import { PlockPhotoFeed } from "@/components/plock-photo-feed";
-import { RealtimePhotoFeed } from "@/components/realtime-photo-feed";
 import { getCachedCafes } from "@/lib/cache";
 import Link from "next/link";
 
