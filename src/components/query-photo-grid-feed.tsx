@@ -157,7 +157,6 @@ export function QueryPhotoGridFeed({ selectedCafeId }: InfiniteScrollProps) {
         <PhotoGrid
           photos={photos}
           controls={controls}
-          isScrolling={isScrolling}
         />
       </div>
 

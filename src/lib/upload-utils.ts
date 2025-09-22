@@ -1,12 +1,16 @@
-'use client';
+"use client";
 
-import { createClient } from '@/lib/supabase/client';
-import { STORAGE_BUCKET } from '@/lib/supabase/client';
-import { createGuestPhoto } from '@/lib/actions';
-import { optimizeImage, generateThumbnail, removeExifData } from '@/lib/image-utils';
+import { createClient } from "@/lib/supabase/client";
+import { STORAGE_BUCKET } from "@/lib/supabase/client";
+import { createGuestPhoto } from "@/lib/actions";
+import {
+  optimizeImage,
+  generateThumbnail,
+  removeExifData,
+} from "@/lib/image-utils";
 
 export interface UploadProgress {
-  stage: 'uploading' | 'processing' | 'completed' | 'error';
+  stage: "uploading" | "processing" | "completed" | "error";
   progress: number;
   currentFile?: string;
   completed: number;
@@ -35,7 +39,7 @@ export async function uploadImages(
 
   // Initial progress
   onProgress({
-    stage: 'processing',
+    stage: "processing",
     progress: 0,
     completed: 0,
     total,
@@ -44,11 +48,11 @@ export async function uploadImages(
 
   for (let i = 0; i < images.length; i++) {
     const imageFile = images[i];
-    
+
     try {
       // Update progress - processing stage (start)
       onProgress({
-        stage: 'processing',
+        stage: "processing",
         progress: (i / total) * 100,
         currentFile: imageFile.file.name,
         completed,
@@ -58,13 +62,13 @@ export async function uploadImages(
 
       // Step 1: Remove EXIF data for privacy
       const cleanedFile = await removeExifData(imageFile.file);
-      
+
       // Step 2: Optimize image
       const optimized = await optimizeImage(cleanedFile, {
         maxWidth: 1920,
         maxHeight: 1920,
         quality: 0.8,
-        format: 'webp',
+        format: "webp",
       });
 
       // Step 3: Generate thumbnail
@@ -72,8 +76,8 @@ export async function uploadImages(
 
       // Update progress - uploading stage
       onProgress({
-        stage: 'uploading',
-        progress: (i / total) * 100 + (50 / total), // Mid-way through current file
+        stage: "uploading",
+        progress: (i / total) * 100 + 50 / total, // Mid-way through current file
         currentFile: imageFile.file.name,
         completed,
         total,
@@ -81,7 +85,9 @@ export async function uploadImages(
       });
 
       // Step 4: Upload to Supabase Storage
-      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
       const mainImagePath = `images/${fileName}.webp`;
       const thumbnailPath = `thumbnails/${fileName}.webp`;
 
@@ -89,8 +95,8 @@ export async function uploadImages(
       const { error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .upload(mainImagePath, optimized.file, {
-          contentType: 'image/webp',
-          cacheControl: '3600',
+          contentType: "image/webp",
+          cacheControl: "3600",
           upsert: false,
         });
 
@@ -102,14 +108,14 @@ export async function uploadImages(
       const { error: thumbError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .upload(thumbnailPath, thumbnail, {
-          contentType: 'image/webp',
-          cacheControl: '3600',
+          contentType: "image/webp",
+          cacheControl: "3600",
           upsert: false,
         });
 
       if (thumbError) {
         // Thumbnail upload failure is not critical, log but continue
-        console.warn('Thumbnail upload failed:', thumbError);
+        console.warn("Thumbnail upload failed:", thumbError);
       }
 
       // Step 5: Get public URLs
@@ -122,39 +128,42 @@ export async function uploadImages(
         .getPublicUrl(thumbnailPath);
 
       // Step 6: Create database record
-      await createGuestPhoto(publicUrlData.publicUrl, cafeId, {
-        thumbnailUrl: thumbUrlData.publicUrl,
-        originalFileName: imageFile.file.name,
-        fileSize: optimized.file.size,
-        dimensions: optimized.dimensions,
-        sizeReduction: optimized.sizeReduction,
-        uploadedAt: new Date().toISOString(),
-      });
+      // await createGuestPhoto(publicUrlData.publicUrl, cafeId, {
+      //   thumbnailUrl: thumbUrlData.publicUrl,
+      //   originalFileName: imageFile.file.name,
+      //   fileSize: optimized.file.size,
+      //   dimensions: optimized.dimensions,
+      //   sizeReduction: optimized.sizeReduction,
+      //   uploadedAt: new Date().toISOString(),
+      // });
+      await createGuestPhoto(publicUrlData.publicUrl, cafeId);
 
       completed++;
 
       // Update progress - file completed
       onProgress({
-        stage: 'uploading',
+        stage: "uploading",
         progress: ((i + 1) / total) * 100,
         currentFile: undefined,
         completed,
         total,
         errors: [...errors],
       });
-
     } catch (error) {
       console.error(`Error uploading ${imageFile.file.name}:`, error);
       errors.push(
         `${imageFile.file.name}: ${
-          error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.'
+          error instanceof Error
+            ? error.message
+            : "알 수 없는 오류가 발생했습니다."
         }`
       );
     }
   }
 
   // Final progress
-  const finalStage = errors.length > 0 && completed === 0 ? 'error' : 'completed';
+  const finalStage =
+    errors.length > 0 && completed === 0 ? "error" : "completed";
   onProgress({
     stage: finalStage,
     progress: 100,
@@ -176,27 +185,33 @@ export async function uploadImages(
 export async function ensureStorageBucket(): Promise<void> {
   const supabase = createClient();
   try {
-    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-    
+    const { data: buckets, error: listError } =
+      await supabase.storage.listBuckets();
+
     if (listError) {
-      console.warn('Could not list buckets:', listError);
+      console.warn("Could not list buckets:", listError);
       return;
     }
 
-    const bucketExists = buckets?.some(bucket => bucket.name === STORAGE_BUCKET);
-    
+    const bucketExists = buckets?.some(
+      (bucket) => bucket.name === STORAGE_BUCKET
+    );
+
     if (!bucketExists) {
-      const { error: createError } = await supabase.storage.createBucket(STORAGE_BUCKET, {
-        public: true,
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-        fileSizeLimit: 10 * 1024 * 1024, // 10MB
-      });
+      const { error: createError } = await supabase.storage.createBucket(
+        STORAGE_BUCKET,
+        {
+          public: true,
+          allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+          fileSizeLimit: 10 * 1024 * 1024, // 10MB
+        }
+      );
 
       if (createError) {
-        console.error('Failed to create storage bucket:', createError);
+        console.error("Failed to create storage bucket:", createError);
       }
     }
   } catch (error) {
-    console.error('Storage bucket check failed:', error);
+    console.error("Storage bucket check failed:", error);
   }
 }
