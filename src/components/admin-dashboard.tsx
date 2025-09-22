@@ -187,7 +187,7 @@ export function AdminDashboard() {
       setPhotos(photos.filter((photo) => photo.id !== photoId));
       setSelectedPhotos(selectedPhotos.filter((id) => id !== photoId));
       toast.success("게스트 포토가 삭제되었습니다.");
-    } catch (error) {
+    } catch {
       toast.error("삭제 처리 중 오류가 발생했습니다.");
     }
   };
@@ -204,7 +204,7 @@ export function AdminDashboard() {
       toast.success(
         `${selectedPhotos.length}개의 게스트 포토가 승인되었습니다.`
       );
-    } catch (error) {
+    } catch {
       toast.error("일괄 승인 처리 중 오류가 발생했습니다.");
     }
   };
@@ -217,7 +217,7 @@ export function AdminDashboard() {
       toast.success(
         `${selectedPhotos.length}개의 게스트 포토가 삭제되었습니다.`
       );
-    } catch (error) {
+    } catch {
       toast.error("일괄 삭제 처리 중 오류가 발생했습니다.");
     }
   };
@@ -235,7 +235,7 @@ export function AdminDashboard() {
       setNewCafe({ name: "", address: "", value: "", isHidden: false });
       setShowCafeDialog(false);
       toast.success("새 카페가 추가되었습니다.");
-    } catch (error) {
+    } catch {
       toast.error("카페 추가 중 오류가 발생했습니다.");
     }
   };
@@ -252,7 +252,7 @@ export function AdminDashboard() {
       setNewParticipant({ name: "", instagram: "", cafeId: "", position: "" });
       setShowParticipantDialog(false);
       toast.success("새 참가자가 추가되었습니다.");
-    } catch (error) {
+    } catch {
       toast.error("참가자 추가 중 오류가 발생했습니다.");
     }
   };
@@ -270,7 +270,7 @@ export function AdminDashboard() {
       loadData();
       setEditingCafe(null);
       toast.success("카페 정보가 수정되었습니다.");
-    } catch (error) {
+    } catch {
       toast.error("카페 수정 중 오류가 발생했습니다.");
     }
   };
@@ -287,7 +287,7 @@ export function AdminDashboard() {
       loadData();
       setEditingParticipant(null);
       toast.success("참가자 정보가 수정되었습니다.");
-    } catch (error) {
+    } catch {
       toast.error("참가자 수정 중 오류가 발생했습니다.");
     }
   };
@@ -303,7 +303,7 @@ export function AdminDashboard() {
       toast.success(
         `게스트 포토가 ${!currentStatus ? "승인" : "승인 취소"}되었습니다.`
       );
-    } catch (error) {
+    } catch {
       toast.error("게스트 포토 상태 변경 중 오류가 발생했습니다.");
     } finally {
       setUpdatingPhotos((prev) => {
@@ -325,7 +325,7 @@ export function AdminDashboard() {
       toast.success(
         `카페가 ${!currentHidden ? "숨김" : "표시"} 상태로 변경되었습니다.`
       );
-    } catch (error) {
+    } catch {
       toast.error("카페 표시 상태 변경 중 오류가 발생했습니다.");
     } finally {
       setUpdatingCafes((prev) => {

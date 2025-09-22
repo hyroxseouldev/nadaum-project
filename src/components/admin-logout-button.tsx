@@ -5,7 +5,6 @@ import { LogOut } from "lucide-react";
 import { logoutAction } from "@/lib/auth-actions";
 import { useState } from "react";
 import { toast } from "sonner";
-import { NextResponse } from "next/server";
 
 export function AdminLogoutButton() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);

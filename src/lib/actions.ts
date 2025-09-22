@@ -57,8 +57,7 @@ export async function getGuestPhotos(page = 0, cafeId?: string, limit = 20) {
 
 export async function createGuestPhoto(
   imageUrl: string,
-  cafeId: string,
-  _metadata?: object
+  cafeId: string
 ) {
   try {
     const [newPhoto] = await db

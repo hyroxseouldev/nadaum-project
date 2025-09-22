@@ -15,10 +15,11 @@ export interface InfiniteScrollProps {
   selectedCafeId?: string;
 }
 
+import type { AnimationControls } from "motion/react";
+
 export interface PhotoGridProps {
   photos: GuestPhoto[];
-  controls: any; // motion controls
-  isScrolling?: boolean;
+  controls: AnimationControls;
 }
 
 export interface SkeletonGridProps {

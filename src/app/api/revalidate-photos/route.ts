@@ -10,7 +10,7 @@ export async function POST() {
     revalidatePath('/');
 
     return NextResponse.json({ revalidated: true });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ message: 'Error revalidating' }, { status: 500 });
   }
 }

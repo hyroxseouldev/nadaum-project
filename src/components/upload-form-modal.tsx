@@ -3,13 +3,12 @@ import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ImageUploader } from "@/components/image-uploader";
 import { UploadProgress } from "@/components/upload-progress";
 import { TermsAgreement } from "@/components/terms-agreement";
 import { uploadImages } from "@/lib/upload-utils";
-import { Camera, Upload, AlertCircle } from "lucide-react";
+import { Upload, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface ImageFile {

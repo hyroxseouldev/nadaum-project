@@ -35,17 +35,17 @@ export function ImageUploader({
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateFile = (file: File): string | null => {
+  const validateFile = useCallback((file: File): string | null => {
     if (!acceptedTypes.includes(file.type)) {
       return `지원하지 않는 파일 형식입니다. (${acceptedTypes.map(t => t.split('/')[1]).join(', ')} 파일만 업로드 가능)`;
     }
-    
+
     if (file.size > maxFileSize * 1024 * 1024) {
       return `파일 크기가 ${maxFileSize}MB를 초과합니다.`;
     }
-    
+
     return null;
-  };
+  }, [acceptedTypes, maxFileSize]);
 
   const processFiles = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files);
@@ -89,7 +89,7 @@ export function ImageUploader({
     } else {
       setError(null);
     }
-  }, [images, maxFiles, onImagesChange]);
+  }, [images, maxFiles, onImagesChange, validateFile]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();

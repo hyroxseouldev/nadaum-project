@@ -5,7 +5,7 @@ import { Masonry } from "react-plock";
 import { motion } from "motion/react";
 import type { PhotoGridProps } from "./types";
 
-export function PhotoGrid({ photos, controls, isScrolling }: PhotoGridProps) {
+export function PhotoGrid({ photos, controls }: PhotoGridProps) {
   return (
     <motion.div animate={controls}>
       <Masonry
@@ -15,7 +15,7 @@ export function PhotoGrid({ photos, controls, isScrolling }: PhotoGridProps) {
           gap: [4, 4, 4], // 4px gap across all breakpoints
           media: [768, 960, 1024], // breakpoints at 768px (md) and 960px (lg)
         }}
-        render={(photo, idx) => (
+        render={(photo) => (
           <motion.div
             key={photo.id}
             className="overflow-hidden group relative"
