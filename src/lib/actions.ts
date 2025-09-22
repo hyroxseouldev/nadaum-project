@@ -9,7 +9,16 @@ import type { Cafe, Guestphoto, Participant } from "@/lib/db/schema";
 // Guest Photo Actions
 export async function getGuestPhotos(page = 0, cafeId?: string, limit = 20) {
   try {
-    let query = db
+    // Build base conditions
+    const baseConditions = [eq(guestphoto.adminApproval, true)];
+
+    // Add cafe filter if provided
+    if (cafeId) {
+      baseConditions.push(eq(guestphoto.cafeId, cafeId));
+    }
+
+    // Fetch one extra item to check if there are more pages
+    const photos = await db
       .select({
         id: guestphoto.id,
         imageUrl: guestphoto.imageUrl,
@@ -24,40 +33,19 @@ export async function getGuestPhotos(page = 0, cafeId?: string, limit = 20) {
       })
       .from(guestphoto)
       .leftJoin(cafe, eq(guestphoto.cafeId, cafe.id))
-      .where(eq(guestphoto.adminApproval, true))
+      .where(and(...baseConditions))
       .orderBy(desc(guestphoto.createdAt))
-      .limit(limit)
+      .limit(limit + 1) // Fetch one extra to check for more pages
       .offset(page * limit);
 
-    if (cafeId) {
-      query = db
-        .select({
-          id: guestphoto.id,
-          imageUrl: guestphoto.imageUrl,
-          cafeId: guestphoto.cafeId,
-          createdAt: guestphoto.createdAt,
-          adminApproval: guestphoto.adminApproval,
-          cafe: {
-            id: cafe.id,
-            name: cafe.name,
-            address: cafe.address,
-          },
-        })
-        .from(guestphoto)
-        .leftJoin(cafe, eq(guestphoto.cafeId, cafe.id))
-        .where(
-          and(eq(guestphoto.adminApproval, true), eq(guestphoto.cafeId, cafeId))
-        )
-        .orderBy(desc(guestphoto.createdAt))
-        .limit(limit)
-        .offset(page * limit);
-    }
+    // Check if there are more pages by seeing if we got more than requested
+    const hasMore = photos.length > limit;
 
-    const photos = await query;
-    const hasMore = photos.length === limit;
+    // Remove the extra item if it exists
+    const data = hasMore ? photos.slice(0, limit) : photos;
 
     return {
-      data: photos,
+      data,
       hasMore,
       nextPage: hasMore ? page + 1 : null,
     };
@@ -124,32 +112,33 @@ export async function deleteGuestPhoto(id: string) {
     if (photoRecord?.imageUrl) {
       // Extract file path from the Supabase Storage URL
       const url = new URL(photoRecord.imageUrl);
-      const pathSegments = url.pathname.split('/');
-      
+      const pathSegments = url.pathname.split("/");
+
       // URL format: /storage/v1/object/public/guest-photos/images/filename.webp
-      const bucketIndex = pathSegments.findIndex(segment => segment === 'guest-photos');
+      const bucketIndex = pathSegments.findIndex(
+        (segment) => segment === "guest-photos"
+      );
       if (bucketIndex !== -1 && bucketIndex + 1 < pathSegments.length) {
-        const filePath = pathSegments.slice(bucketIndex + 1).join('/');
-        
+        const filePath = pathSegments.slice(bucketIndex + 1).join("/");
+
         // Try to delete from storage (server-side)
         try {
-          const { createClient } = await import('@/lib/supabase/server');
+          const { createClient } = await import("@/lib/supabase/server");
           const supabase = await createClient();
-          
+
           // Delete main image
-          await supabase.storage
-            .from('guest-photos')
-            .remove([filePath]);
+          await supabase.storage.from("guest-photos").remove([filePath]);
 
           // Try to delete thumbnail if it exists
-          if (filePath.startsWith('images/')) {
-            const thumbnailPath = filePath.replace('images/', 'thumbnails/');
-            await supabase.storage
-              .from('guest-photos')
-              .remove([thumbnailPath]);
+          if (filePath.startsWith("images/")) {
+            const thumbnailPath = filePath.replace("images/", "thumbnails/");
+            await supabase.storage.from("guest-photos").remove([thumbnailPath]);
           }
         } catch (storageError) {
-          console.warn("Warning: Could not delete files from storage:", storageError);
+          console.warn(
+            "Warning: Could not delete files from storage:",
+            storageError
+          );
           // Continue with database deletion even if storage deletion fails
         }
       }
@@ -356,6 +345,7 @@ export async function updateParticipant(
 // Admin-specific actions
 export async function getAllGuestPhotos(page = 0, limit = 20) {
   try {
+    // Fetch one extra item to check if there are more pages
     const photos = await db
       .select({
         id: guestphoto.id,
@@ -372,13 +362,17 @@ export async function getAllGuestPhotos(page = 0, limit = 20) {
       .from(guestphoto)
       .leftJoin(cafe, eq(guestphoto.cafeId, cafe.id))
       .orderBy(desc(guestphoto.createdAt))
-      .limit(limit)
+      .limit(limit + 1) // Fetch one extra to check for more pages
       .offset(page * limit);
 
-    const hasMore = photos.length === limit;
+    // Check if there are more pages by seeing if we got more than requested
+    const hasMore = photos.length > limit;
+
+    // Remove the extra item if it exists
+    const data = hasMore ? photos.slice(0, limit) : photos;
 
     return {
-      data: photos,
+      data,
       hasMore,
       nextPage: hasMore ? page + 1 : null,
     };

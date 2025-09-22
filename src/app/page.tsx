@@ -1,5 +1,5 @@
 import MainLayout from "@/components/main-layout";
-import { PlockPhotoFeed } from "@/components/plock-photo-feed";
+import { QueryPhotoGridFeed } from "@/components/query-photo-grid-feed";
 import { getCachedCafes } from "@/lib/cache";
 import Link from "next/link";
 
@@ -40,9 +40,10 @@ export default async function Home({ searchParams }: HomeProps) {
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto pb-20">
         {/* <GuestPhotoFeed selectedCafeId={cafeId} /> */}
-        <PlockPhotoFeed selectedCafeId={cafeId} />
+        {/* <PlockPhotoFeed selectedCafeId={cafeId} /> */}
         {/* <AnimationPhotoFeed selectedCafeId={cafeId} /> */}
         {/* <RealtimePhotoFeed selectedCafeId={cafeId} /> */}
+        <QueryPhotoGridFeed selectedCafeId={cafeId} />
       </div>
     </MainLayout>
   );

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans, Noto_Sans_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import TanStackProvider from "@/components/tanstack-provider";
 
 const notoSans = Noto_Sans({
   variable: "--font-noto-sans",
@@ -51,9 +52,13 @@ export default function RootLayout({
       <body
         className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}
       >
-        {children}
-        {modal}
-        <Toaster />
+        <TanStackProvider>
+          <>
+            {children}
+            {modal}
+            <Toaster />
+          </>
+        </TanStackProvider>
       </body>
     </html>
   );
